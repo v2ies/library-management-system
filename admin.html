@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>UPHSD Molino Library — Admin Console</title>
+<meta name="description" content="University of Perpetual Help System DALTA - Molino Campus Library Admin Console"/>
+<link rel="stylesheet" href="styles.css"/>
+<script>
+/* Early theme restore — avoids white flash on reload. No network, local only. */
+(function(){try{
+  var t=localStorage.getItem('uphsd_theme');
+  var dark = t==='dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if(dark){document.documentElement.setAttribute('data-theme','dark');}
+}catch(e){}})();
+</script>
+</head>
+<body>
+
+<div class="filewarn hidden" id="fileWarn">You opened this file directly — Student and Admin pages can't share data this way. Open this folder with a local server instead (VS Code Live Server, or run <b>python -m http.server</b> here).</div>
+
+<button class="theme-toggle theme-float" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" style="max-width:430px">
+    <h2 id="confirmTitle"></h2>
+    <p class="sub" id="confirmDesc" style="margin-bottom:22px"></p>
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger-solid" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+<section class="screen" id="screen-admin-landing">
+  <div style="width:100%;max-width:720px;text-align:center">
+    <h1 style="font-size:26px;font-weight:800">University of Perpetual Help System DALTA</h1>
+    <p style="color:var(--maroon);font-weight:700;margin:6px 0 2px;font-size:15px">Molino Campus &middot; Library Management System</p>
+    <p style="color:var(--muted);margin:0 0 30px;font-size:14px">Admin access — please continue to log in.</p>
+
+    <div class="role-grid" style="grid-template-columns:1fr;max-width:440px;margin:0 auto">
+      <div class="role-card" onclick="goAdminLogin()">
+        <div class="role-ic" style="color:var(--maroon)">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 style="font-size:18px;font-weight:800">Admin</h3>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 0">Manage books, students, and all borrow records.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen hidden" id="screen-admin-login">
+  <div class="card" style="width:100%;max-width:410px;padding:32px">
+    <div class="brandmark" style="margin:0 auto 16px;color:var(--maroon)"><svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <h2 style="text-align:center;font-size:20px;font-weight:800">Admin Login</h2>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin:6px 0 24px">Enter the librarian credentials.</p>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div><label class="lbl">Username</label><input id="adminUser" autocomplete="off"></div>
+      <div><label class="lbl">Password</label><input id="adminPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+      <p id="adminErr" class="err-text hidden"></p>
+      <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">Log In</button>
+      <button class="btn btn-ghost" style="width:100%" onclick="showScreen('screen-admin-landing')">&larr; Back</button>
+    </div>
+  </div>
+</section>
+
+<section class="hidden" id="screen-admin">
+  <header class="app-header" style="background:#fff;color:var(--ink);border-bottom:1px solid var(--line)">
+    <div class="app-inner">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="public/uphsd-logo.png" alt="UPHSD Logo" style="height:36px;width:auto;object-fit:contain">
+        <div>
+          <h1 style="font-size:16px;font-weight:800;color:#7a0c0c">UPHSD Molino Library</h1>
+          <p style="margin:0;font-size:12px;color:#7a0c0c">Admin Console</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="theme-toggle" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-gold" onclick="logout()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Log Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn tab-active" onclick="switchTab('dashboard',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+      </button>
+      <button class="tab-btn" onclick="switchTab('books',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Books
+      </button>
+      <button class="tab-btn" onclick="switchTab('students',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Students
+      </button>
+      <button class="tab-btn" onclick="switchTab('requests',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Requests
+        <span id="reqBadge" class="badge b-pending" style="margin-left:2px"></span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('borrow',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>Borrow
+      </button>
+      <button class="tab-btn" onclick="switchTab('history',this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>History
+      </button>
+    </div>
+
+    <div id="tab-dashboard" class="tab-content active">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px" id="statCards"></div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px" id="dashBottom">
+        <div class="card" id="categoryCard"></div>
+        <div class="card" id="activityCard"></div>
+      </div>
+    </div>
+
+    <div id="tab-books" class="tab-content">
+      <div class="card" style="margin-bottom:16px">
+        <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:10px;flex:1;flex-wrap:wrap">
+            <input id="bookSearch" placeholder="Search title, author, ISBN..." style="max-width:320px" oninput="renderBooks()">
+            <select id="bookCatFilter" style="width:170px" onchange="renderBooks()">
+              <option value="">All Categories</option>
+              <option>Fiction</option><option>Science</option><option>History</option><option>Reference</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('addBookModal')">+ Add Book</button>
+          <button class="btn btn-ghost" style="font-size:13px;padding:8px 12px" onclick="openManageCategories()">Manage Categories</button>
+        </div>
+      </div>
+      <div id="booksGrid"></div>
+    </div>
+
+    <div id="tab-students" class="tab-content">
+      <div class="card" style="margin-bottom:16px">
+        <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+          <input id="studentSearch" placeholder="Search name, ID, course, section..." style="max-width:400px" oninput="renderStudents()">
+          <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
+        </div>
+      </div>
+      <div class="card"><div id="studentsTable"></div></div>
+    </div>
+
+    <div id="tab-requests" class="tab-content">
+      <div class="card" style="margin-bottom:16px">
+        <div style="padding:16px;display:flex;align-items:center;gap:8px">
+          <svg width="16" height="16" fill="none" stroke="var(--maroon)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <strong>Pending Borrow Requests</strong>
+          <span style="font-size:13px;color:var(--muted)">Students request books; approve to issue them.</span>
+        </div>
+      </div>
+      <div class="card"><div id="requestsTable"></div></div>
+    </div>
+
+    <div id="tab-borrow" class="tab-content">
+      <div style="display:grid;grid-template-columns:2fr 3fr;gap:16px" id="borrowGrid">
+        <div class="card">
+          <div style="padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px">
+            <svg width="16" height="16" fill="none" stroke="var(--maroon)" stroke-width="2" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4 4 4"/></svg>
+            <strong>Issue a Book</strong>
+          </div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div><label class="lbl">Student *</label><select id="borrowStudent"><option value="">Select a student</option></select></div>
+            <div><label class="lbl">Book *</label><select id="borrowBook"><option value="">Select an available book</option></select></div>
+            <div><label class="lbl">Due Date</label><input id="borrowDue" type="date"><p class="hint">Defaults to 14 days from today.</p></div>
+            <button class="btn btn-primary" style="width:100%" onclick="issueBorrow()">Issue Book</button>
+          </div>
+        </div>
+        <div class="card">
+          <div style="padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px">
+            <svg width="16" height="16" fill="none" stroke="var(--purple)" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <strong>Currently Borrowed</strong>
+            <span id="activeBorrowCount" class="badge b-borrowed"></span>
+          </div>
+          <div id="activeBorrowsTable"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-history" class="tab-content">
+      <div class="card" style="margin-bottom:16px">
+        <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <strong style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" fill="none" stroke="var(--maroon)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Borrow History</strong>
+          <select id="historyFilter" style="width:170px" onchange="renderHistory()">
+            <option value="all">All Records</option>
+            <option value="borrowed">Borrowed</option>
+            <option value="returned">Returned</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+        <div style="padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center" id="historyCounts"></div>
+      </div>
+      <div class="card"><div id="historyTable"></div></div>
+    </div>
+  </main>
+</section>
+
+<div class="overlay" id="addBookModal">
+  <div class="modal">
+    <h2>Add a new book</h2>
+    <p class="sub">Add a book to the library collection.</p>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div><label class="lbl">Title *</label><input id="bTitle" placeholder="e.g. Noli Me Tangere"></div>
+      <div><label class="lbl">Author *</label><input id="bAuthor" placeholder="e.g. Jose Rizal"></div>
+      <div><label class="lbl">Category *</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="bCategory" style="flex:1"><option>Fiction</option><option>Science</option><option>History</option><option>Reference</option></select>
+          <input id="bNewCat" placeholder="New category" style="flex:1">
+          <button class="btn btn-outline" style="padding:10px 12px;flex-shrink:0" onclick="addCategory()" title="Add category">+</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="lbl">ISBN *</label><input id="bISBN" placeholder="978-..."></div>
+        <div><label class="lbl">Total Copies</label><input id="bCopies" type="number" min="1" value="1"></div>
+      </div>
+      <div><label class="lbl">Description</label><textarea id="bDesc" rows="3" placeholder="Short description..."></textarea></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+      <button class="btn btn-outline" onclick="closeModal('addBookModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addBook()">Add Book</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="addStudentModal">
+  <div class="modal">
+    <h2>Register a new student</h2>
+    <p class="sub">Add a student so they can borrow books.</p>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div><label class="lbl">Full Name *</label><input id="sName"></div>
+      <div><label class="lbl">Student ID *</label><input id="sId" maxlength="11" oninput="formatSid(this)"><p class="hint">Format: 25-XXXX-XXX</p></div>
+      <div><label class="lbl">Temporary Password *</label><input id="sPassword" type="password" placeholder="••••••"><p class="hint">At least 6 characters. The student can change it later in Settings.</p></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label class="lbl">Year Level *</label><select id="sYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option></select></div>
+        <div><label class="lbl">Section *</label><input id="sSection"></div>
+      </div>
+      <div><label class="lbl">Course *</label>
+        <select id="sCourse">
+          <option>BS Information Technology</option><option>BS Computer Science</option>
+          <option>BS Computer Engineering</option><option>BS Accountancy</option>
+          <option>BS Business Administration</option><option>BS Nursing</option>
+          <option>BS Psychology</option><option>BS Education</option>
+          <option>BS Criminology</option><option>BS Hospitality Management</option>
+          <option>BS Tourism Management</option><option>BS Medical Technology</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+      <button class="btn btn-outline" onclick="closeModal('addStudentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addStudentAdmin()">Register</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="manageCatModal">
+  <div class="modal" style="max-width:480px">
+    <h2>Manage Categories</h2>
+    <p class="sub">View and remove custom categories. Default categories cannot be deleted.</p>
+    <div id="manageCatList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:18px">
+      <button class="btn btn-outline" onclick="closeModal('manageCatModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
