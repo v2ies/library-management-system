@@ -9,7 +9,7 @@ A simple, offline-first library management system for the **University of Perpet
 | `index.html` | Students     | Landing panel → Student log in / registration → Student portal (Browse Books, My Books, Settings) |
 | `admin.html` | Librarians   | Admin landing panel → Admin login → Admin console (Dashboard, Books, Students, Requests, Borrow, History) |
 
-Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `app.js` (all logic and data).
+Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `common.js` (theme, data store, shared UI, navigation, boot). Page logic lives in `student.js` (`index.html` only) and `admin.js` (`admin.html` only).
 
 ## Features
 
@@ -67,7 +67,9 @@ Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `a
 ├── index.html   # Student side (landing, gate, portal)
 ├── admin.html   # Admin side (landing, login, console)
 ├── styles.css   # Shared theme (flat colors, light + dark mode)
-├── app.js       # Shared logic, storage, and cross-tab sync
+├── common.js    # Shared logic, storage, navigation, cross-tab sync
+├── student.js   # Student-side logic (index.html only)
+├── admin.js     # Admin-side logic (admin.html only)
 ├── public/
 │   └── uphsd-logo.png
 └── README.md

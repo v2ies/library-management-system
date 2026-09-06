@@ -1,16 +1,7 @@
-/* ============================================================
-   UPHSD Molino Library — Design System
-   A quiet, editorial "ledger" language: deep institutional
-   maroon + brass gold, warm paper neutrals, and a thin flat
-   rule that recurs as the page's signature — on the header,
-   and atop every card, like a stamped ledger line.
-   (No gradients — all flat solid colors.)
-   ============================================================ */
-
 @import url('https://fonts.googleapis.com/css2?family=Cascadia+Code:wght@400;500;600;700&display=swap');
 
 :root{
-  /* --- brand --- */
+  
   --maroon:#6e1220;
   --maroon-dark:#4a0a15;
   --maroon-tint:#fbeced;
@@ -18,7 +9,7 @@
   --gold-dark:#8a6a22;
   --gold-tint:#f4e9cd;
 
-  /* --- neutrals --- */
+  
   --bg:#f4f0e8;
   --surface:#ffffff;
   --surface-2:#faf7f1;
@@ -29,7 +20,7 @@
   --line:#e5ddc9;
   --line-soft:#eee7d7;
 
-  /* --- semantic --- */
+  
   --green:#276a45;
   --green-tint:#e6f2ea;
   --red:#a3291f;
@@ -39,7 +30,7 @@
   --amber:#8a6812;
   --amber-tint:#faf1d9;
 
-  /* --- rhythm --- */
+  
   --r-sm:8px;
   --r-md:12px;
   --r-lg:20px;
@@ -71,7 +62,6 @@ button{font-family:inherit}
   *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
 }
 
-/* ---------------- Buttons ---------------- */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
   padding:11px 20px;border-radius:var(--r-sm);font-size:13.5px;font-weight:700;
@@ -93,7 +83,6 @@ button{font-family:inherit}
 .icon-btn{background:transparent;border:none;cursor:pointer;color:var(--faint);padding:7px;border-radius:var(--r-sm);display:inline-flex;transition:.15s}
 .icon-btn:hover{color:var(--red);background:var(--red-tint)}
 
-/* ---------------- Forms ---------------- */
 label.lbl{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;letter-spacing:.01em}
 input,select,textarea{
   width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--r-sm);
@@ -109,7 +98,6 @@ select{cursor:pointer}
 .hint b{color:var(--ink-soft)}
 .err-text{font-size:12px;color:var(--red);margin:6px 0 0;font-weight:700}
 
-/* ---------------- Card (signature: hairline ledger rule) ---------------- */
 .card{
   position:relative;background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow-sm);
@@ -118,7 +106,6 @@ select{cursor:pointer}
   content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--rule);
 }
 
-/* ---------------- Badges ---------------- */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r-pill);font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border:1px solid transparent}
 .b-fic{background:var(--amber-tint);color:var(--amber);border-color:#e9d69f}
 .b-sci{background:#e7eff9;color:#264d85;border-color:#c3d6ee}
@@ -130,7 +117,6 @@ select{cursor:pointer}
 .b-pending{background:var(--amber-tint);color:var(--amber);border-color:#e9d69f}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-/* ---------------- Tables ---------------- */
 table{width:100%;border-collapse:collapse}
 th{
   text-align:left;padding:12px 18px;font-size:10.5px;font-weight:700;color:var(--muted);
@@ -141,14 +127,12 @@ td{padding:14px 18px;border-bottom:1px solid var(--line-soft);font-size:13.5px;v
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fdfcf8}
 
-/* ---------------- Avatar ---------------- */
 .avatar{
   width:38px;height:38px;border-radius:50%;background:var(--maroon);color:#fff;
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13.5px;
   flex-shrink:0;box-shadow:0 2px 6px rgba(110,18,32,.35);
 }
 
-/* ---------------- Overlays / modal ---------------- */
 .overlay{
   display:none;position:fixed;inset:0;background:rgba(24,13,9,.6);
   backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
@@ -167,7 +151,6 @@ tr:hover td{background:#fdfcf8}
 .modal h2{font-size:20px;font-weight:700}
 .modal .sub{font-size:13.5px;color:var(--muted);margin:6px 0 22px}
 
-/* ---------------- Toasts ---------------- */
 .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:10px}
 .toast{
   background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--green);
@@ -180,7 +163,6 @@ tr:hover td{background:#fdfcf8}
 @keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
 
-/* ---------------- Landing ---------------- */
 .screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 .brandmark{
   width:64px;height:64px;background:transparent;
@@ -189,7 +171,6 @@ tr:hover td{background:#fdfcf8}
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media(max-width:560px){.role-grid{grid-template-columns:1fr}}
 
-/* ---------------- Mobile: stack fixed-ratio dashboard/borrow grids ---------------- */
 @media(max-width:760px){
   #dashBottom,#borrowGrid{grid-template-columns:1fr !important}
   .app-inner{flex-wrap:wrap;padding:12px 16px}
@@ -205,7 +186,6 @@ tr:hover td{background:#fdfcf8}
 .role-card:hover::before{transform:scaleX(1)}
 .role-ic{width:66px;height:66px;background:transparent;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
 
-/* ---------------- App shell ---------------- */
 .app-header{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:var(--shadow-sm)}
 .app-header::after{content:"";display:block;height:3px;background:var(--rule)}
 .app-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:13px 22px;gap:12px}
@@ -233,13 +213,8 @@ main{max-width:1200px;margin:0 auto;padding:26px 22px 64px}
 .progress{height:8px;background:var(--line-soft);border-radius:var(--r-pill);overflow:hidden}
 .progress > div{height:100%;background:var(--rule);border-radius:var(--r-pill);transition:width .3s}
 
-/* ---------------- Scrollbar hidden ---------------- */
 *{scrollbar-width:none;-ms-overflow-style:none}
 ::-webkit-scrollbar{display:none;width:0;height:0}
-
-/* ============================================================
-   DARK MODE — flat colors, no gradients.
-   ============================================================ */
 
 .theme-toggle{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -252,14 +227,13 @@ main{max-width:1200px;margin:0 auto;padding:26px 22px 64px}
 .theme-toggle svg{width:18px;height:18px}
 .theme-float{position:fixed;top:16px;right:16px;z-index:90;box-shadow:var(--shadow-sm)}
 
-/* smooth theme switch */
 body, .card, .modal, .app-header, input, select, textarea,
 .tabs, .tab-btn, .stat-card, .role-card, table, th, td, .toast{
   transition:background-color .2s ease, color .2s ease, border-color .2s ease;
 }
 
 [data-theme="dark"]{
-  /* neutrals go warm-dark, brand stays */
+  
   --bg:#141009;
   --surface:#1e1812;
   --surface-2:#282017;
@@ -295,13 +269,10 @@ body[data-theme="dark"]{
 [data-theme="dark"] ::selection{background:#3a2f14;color:#ffe9a8}
 [data-theme="dark"] :focus-visible{outline-color:var(--gold)}
 
-/* header + cards use flat ledger rule */
 [data-theme="dark"] .app-header{box-shadow:0 1px 0 rgba(0,0,0,.4)}
 
-/* table row hover was hardcoded light (#fdfcf8) — dark equivalent */
 [data-theme="dark"] tr:hover td{background:#262017}
 
-/* inputs: keep border logic but dark-friendly */
 [data-theme="dark"] input:hover,
 [data-theme="dark"] select:hover,
 [data-theme="dark"] textarea:hover{border-color:#5a4d38}
@@ -310,11 +281,9 @@ body[data-theme="dark"]{
 [data-theme="dark"] textarea:focus{box-shadow:0 0 0 3.5px rgba(169,129,47,.22)}
 [data-theme="dark"] select option{background:#1e1812;color:#f0e6d2}
 
-/* buttons: flat colors, no gradients */
 [data-theme="dark"] .btn-primary{box-shadow:0 6px 16px -6px rgba(0,0,0,.6)}
 [data-theme="dark"] .btn-ghost:hover{background:var(--surface-2)}
 
-/* badges: keep hue, darken fill for dark bg */
 [data-theme="dark"] .b-fic{background:#382d0e;color:#e8c35a;border-color:#6b5a22}
 [data-theme="dark"] .b-sci{background:#16283f;color:#8db4ec;border-color:#2c4d7d}
 [data-theme="dark"] .b-his{background:#2b2140;color:#c2a6f0;border-color:#54407c}
@@ -324,39 +293,26 @@ body[data-theme="dark"]{
 [data-theme="dark"] .b-overdue{background:#3b1a16;color:#f08a80;border-color:#7a2e26}
 [data-theme="dark"] .b-pending{background:#382d0e;color:#e8c35a;border-color:#6b5a22}
 
-/* file:// warning banner (shown only when pages are double-clicked instead of served) */
 .filewarn{
   position:sticky;top:0;z-index:120;background:var(--maroon);color:#fff;
   font-size:13px;font-weight:700;text-align:center;padding:10px 16px;line-height:1.5;
 }
 
-/* avatar shadow softer on dark */
 [data-theme="dark"] .avatar{box-shadow:0 2px 8px rgba(0,0,0,.5)}
 
-/* flat icons (no background boxes) — lift dark-hue colors so they stay visible */
 [data-theme="dark"] .stat-ic,
 [data-theme="dark"] .role-ic,
 [data-theme="dark"] .brandmark{filter:brightness(1.7) saturate(.9)}
 
-/* overlay dimmer on dark */
 [data-theme="dark"] .overlay{background:rgba(0,0,0,.65)}
 
-/* ---- hardcoded light inline styles used in HTML/JS, adapted for dark ---- */
-/* student gate tab strip: style="background:#efe7da" */
 [data-theme="dark"] #screen-student-gate div[style*="#efe7da"]{background:#282017 !important}
 
-/* manage-categories rows + utilization box: background:#faf7f1 */
 [data-theme="dark"] #manageCatList > div,
 [data-theme="dark"] #categoryCard div[style*="#faf7f1"]{background:#282017 !important}
 
-/* recent-activity + book-card dividers: border #f2ece2 */
 [data-theme="dark"] #activityCard div[style*="#f2ece2"],
 [data-theme="dark"] #booksGrid div[style*="#f2ece2"]{border-color:#3a3125 !important}
 
-/* app headers use inline background:#fff — follow surface in dark */
 [data-theme="dark"] #screen-admin > header.app-header,
 [data-theme="dark"] #screen-student > header.app-header{background:var(--surface) !important}
-
-/* stat / role icon chips (#fbeaea, #fdeede, #fff4d6, #efe7fb) are pastel
-   pills with dark text — keep them as-is in dark mode on purpose so the
-   maroon/gold accents still pop. Only ensure surrounding text stays light. */
