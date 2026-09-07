@@ -1,6 +1,10 @@
 # UPHSD Molino Library Management System
 
-A simple, offline-first library management system for the **University of Perpetual Help System DALTA – Molino Campus**. Built with plain HTML, CSS, and JavaScript — no frameworks, no backend, no internet required. All data is stored in the browser via `localStorage`.
+A simple, offline-first library management system for the **University of Perpetual Help System DALTA – Molino Campus**. Built with plain HTML, CSS, and JavaScript — no frameworks, no server required. All data is stored in the browser via `localStorage`.
+
+**Live Demo:** [https://v2ies.github.io/library-management-system/](https://v2ies.github.io/library-management-system/)
+
+> After enabling GitHub Pages (see below), the site becomes fully functional online. Data is stored per-browser on the live site just like locally.
 
 ## Pages
 
@@ -34,7 +38,22 @@ Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `c
 - Toast notifications and delete confirmations
 - Responsive layout for desktop and mobile
 
-## Getting Started
+## Deploy to GitHub Pages (Live Site)
+
+1. Go to the repository on GitHub: [v2ies/library-management-system](https://github.com/v2ies/library-management-system)
+2. Click **Settings** → **Pages** (left sidebar under "Code and automation")
+3. Under **Build and deployment** → **Source**, select **Deploy from a branch**
+4. Branch: `main` · Folder: `/ (root)`
+5. Click **Save**
+6. Wait 1–2 minutes, then visit:  
+   **https://v2ies.github.io/library-management-system/**
+
+Student portal: `.../index.html` (or just the root URL)  
+Admin console: `.../admin.html`
+
+A `.nojekyll` file is already present so GitHub Pages serves the files as pure static HTML/JS without running Jekyll.
+
+## Getting Started (Local)
 
 > ⚠️ **Important:** open this project through a **local server**, not by double-clicking the files. Browsers give `file://` pages isolated storage, so `index.html` and `admin.html` would be unable to share data. If you open them directly, a red warning banner will tell you.
 
@@ -72,9 +91,12 @@ Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `c
 ├── admin.js     # Admin-side logic (admin.html only)
 ├── public/
 │   └── uphsd-logo.png
+├── .nojekyll    # Required for clean GitHub Pages serving
 └── README.md
 ```
 
 ## Tech Stack
 
 Vanilla HTML · CSS · JavaScript · Web Storage API (`localStorage` / `sessionStorage`). No dependencies, no build step.
+
+> **Note on "backend":** This system uses the browser itself as the data store (client-side "backend"). It is fully functional for demos, single-user / single-browser use, and classroom presentation. No server, database, or hosting cost is required. Data does not sync across different devices or browsers.
