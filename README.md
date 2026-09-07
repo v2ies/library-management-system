@@ -80,4 +80,4 @@ A simple, offline-first library management system for the **University of Perpet
 
 Vanilla HTML · CSS · JavaScript · Web Storage API (`localStorage` / `sessionStorage`). No dependencies, no build step.
 
-> **Note on "backend":** This system uses the browser itself as the data store (client-side "backend"). It is fully functional for demos, single-user / single-browser use, and classroom presentation. No server, database, or hosting cost is required. Data does not sync across different devices or browsers.
+> **Note on "backend":** This system uses the browser itself as the data store
