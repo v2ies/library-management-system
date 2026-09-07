@@ -74,7 +74,7 @@ function toast(title,desc,err){
   el.innerHTML=`<strong>${esc(title)}</strong>${desc?`<span>${esc(desc)}</span>`:''}`;
   wrap.appendChild(el);setTimeout(()=>{el.style.animation='slideOut .22s ease forwards';setTimeout(()=>el.remove(),220)},3000);
 }
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'&#39;'}[c]))}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"').replace(/'/g,'&#39;')}
 
 function openModal(id){const m=document.getElementById(id);if(m)m.classList.add('open')}
 function closeModal(id){const m=document.getElementById(id);if(m)m.classList.remove('open')}
