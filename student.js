@@ -1,3 +1,4 @@
+// student portal logic
 function switchGate(mode){
   const login=document.getElementById('gateLogin'),reg=document.getElementById('gateRegister');
   const tl=document.getElementById('gateTabLogin'),tr=document.getElementById('gateTabReg');
