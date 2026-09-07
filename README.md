@@ -4,8 +4,6 @@ A simple, offline-first library management system for the **University of Perpet
 
 **Live Demo:** [https://v2ies.github.io/library-management-system/](https://v2ies.github.io/library-management-system/)
 
-> After enabling GitHub Pages (see below), the site becomes fully functional online. Data is stored per-browser on the live site just like locally.
-
 ## Pages
 
 | File         | Who it's for | Contents |
