@@ -11,8 +11,6 @@ A simple, offline-first library management system for the **University of Perpet
 | `index.html` | Students     | Landing panel → Student log in / registration → Student portal (Browse Books, My Books, Settings) |
 | `admin.html` | Librarians   | Admin landing panel → Admin login → Admin console (Dashboard, Books, Students, Requests, Borrow, History) |
 
-Both pages share `styles.css` (flat maroon + gold theme, light/dark mode) and `common.js` (theme, data store, shared UI, navigation, boot). Page logic lives in `student.js` (`index.html` only) and `admin.js` (`admin.html` only).
-
 ## Features
 
 **Student portal (`index.html`)**
