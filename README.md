@@ -34,21 +34,6 @@ A simple, offline-first library management system for the **University of Perpet
 - Toast notifications and delete confirmations
 - Responsive layout for desktop and mobile
 
-## Deploy to GitHub Pages (Live Site)
-
-1. Go to the repository on GitHub: [v2ies/library-management-system](https://github.com/v2ies/library-management-system)
-2. Click **Settings** → **Pages** (left sidebar under "Code and automation")
-3. Under **Build and deployment** → **Source**, select **Deploy from a branch**
-4. Branch: `main` · Folder: `/ (root)`
-5. Click **Save**
-6. Wait 1–2 minutes, then visit:  
-   **https://v2ies.github.io/library-management-system/**
-
-Student portal: `.../index.html` (or just the root URL)  
-Admin console: `.../admin.html`
-
-A `.nojekyll` file is already present so GitHub Pages serves the files as pure static HTML/JS without running Jekyll.
-
 ## Getting Started (Local)
 
 > ⚠️ **Important:** open this project through a **local server**, not by double-clicking the files. Browsers give `file://` pages isolated storage, so `index.html` and `admin.html` would be unable to share data. If you open them directly, a red warning banner will tell you.
