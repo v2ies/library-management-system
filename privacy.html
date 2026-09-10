@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Privacy Notice — UPHSD Molino Library Management System</title>
+<meta name="description" content="Privacy notice for the UPHSD Molino Library Management System class project."/>
+<link rel="stylesheet" href="styles.css"/>
+<script>
+(function(){try{
+var t=localStorage.getItem('uphsd_theme');
+var dark = t==='dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+if(dark){document.documentElement.setAttribute('data-theme','dark');}
+}catch(e){}})();
+function toggleTheme(){
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  if(isDark){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem('uphsd_theme','light')}catch(e){}}
+  else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem('uphsd_theme','dark')}catch(e){}}
+}
+</script>
+</head>
+<body>
+<button class="theme-toggle theme-float" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<div class="legal-wrap">
+<a class="back-link" href="index.html">&larr; Back to the app</a>
+<p class="legal-eyebrow">UPHSD Molino Library Management System</p>
+<h1>Privacy Notice</h1>
+<p class="legal-updated">Last updated: [fill in the date you publish this]</p>
+
+<div class="legal-notice">
+<strong>This is a class project</strong>, built by a student group (contact:
+<a href="mailto:group4@uphsd.edu.ph">group4@uphsd.edu.ph</a>) at University of Perpetual Help
+System DALTA — Molino Campus, for an academic exercise. It is <strong>not</strong> an official
+university system, and UPHSD does not operate, endorse, or take responsibility for it.
+</div>
+
+<div class="card">
+<h2>1. What this system stores</h2>
+<p>When you register or use the Student or Admin side of this app, the following may be stored:</p>
+<ul>
+<li>Full name, Student ID, year level, section, and course (student registration)</li>
+<li>Account password (see the note below — please don't reuse a real/important password)</li>
+<li>Optional profile photo you upload (max 2MB)</li>
+<li>Book requests, borrow/return history, and due dates</li>
+<li>Display theme preference (light/dark)</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>2. Where it's stored — the important part</h2>
+<p>This app has no server and no database. Everything above is saved only in your own web
+browser, using the browser's built-in <code>localStorage</code> and <code>sessionStorage</code>
+(not cookies). Nothing you enter is transmitted over the internet or shared with any third
+party — because there's no "us" on the other end receiving it.</p>
+<p>This means: data doesn't sync between devices or browsers; clearing your browser's site data
+deletes it permanently; and anyone with access to that browser/device can view what's stored
+there, same as with any other browser-only demo app.</p>
+</div>
+
+<div class="card">
+<h2>3. A note on the password field</h2>
+<p>Because there's no server, there's no way to secure the password field the way a production
+system would. Treat this as a demo account, not a real one — use a throwaway password you don't
+use anywhere else.</p>
+</div>
+
+<div class="card">
+<h2>4. Cookies</h2>
+<p>This site doesn't use cookies. It uses <code>localStorage</code> (persistent until cleared)
+and <code>sessionStorage</code> (cleared when the tab/browser closes) purely to run the app
+itself — no tracking or advertising use, so no cookie-consent banner applies here.</p>
+</div>
+
+<div class="card">
+<h2>5. Third parties and analytics</h2>
+<p>This site loads no analytics, tracking pixels, or embeds from outside services (other than
+the Google Fonts stylesheet used for the site's typeface). If that changes in a later version,
+this notice should be updated to say what's added and why.</p>
+</div>
+
+<div class="card">
+<h2>6. Your choices</h2>
+<ul>
+<li>Delete your own data any time by clearing your browser's site data for this page.</li>
+<li>Ask an admin (the class group) to remove a student record from the demo.</li>
+<li>Don't enter information you wouldn't want visible to anyone using the same device/browser.</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>7. Children's data</h2>
+<p>This app is intended for college-level students registering with a UPHSD-format Student ID;
+it's not directed at children.</p>
+</div>
+
+<div class="card">
+<h2>8. Contact</h2>
+<p>Questions about this notice: <a href="mailto:group4@uphsd.edu.ph">group4@uphsd.edu.ph</a></p>
+</div>
+</div>
+
+<footer class="site-footer"><a href="index.html">Back to the app</a> &middot; <a href="terms.html">Terms of Use</a></footer>
+</body>
+</html>

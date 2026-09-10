@@ -23,7 +23,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
 
-<div class="toast-wrap" id="toastWrap"></div>
+<div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
 
 <div class="overlay" id="confirmOverlay">
   <div class="modal" style="max-width:430px">
@@ -58,10 +58,11 @@
   <div class="card" style="width:100%;max-width:410px;padding:32px">
     <div class="brandmark" style="margin:0 auto 16px;color:var(--maroon)"><svg width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
     <h2 style="text-align:center;font-size:20px;font-weight:800">Admin Login</h2>
-    <p style="text-align:center;color:var(--muted);font-size:13px;margin:6px 0 24px">Enter the librarian credentials.</p>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin:6px 0 4px">Enter the librarian credentials.</p>
+    <p style="text-align:center;color:var(--muted);font-size:11.5px;margin:0 0 22px">Coursework demo login — for the class exercise only.</p>
     <div style="display:flex;flex-direction:column;gap:16px">
-      <div><label class="lbl">Username</label><input id="adminUser" autocomplete="off"></div>
-      <div><label class="lbl">Password</label><input id="adminPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+      <div><label class="lbl" for="adminUser">Username</label><input id="adminUser" autocomplete="off"></div>
+      <div><label class="lbl" for="adminPass">Password</label><input id="adminPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')adminLogin()"></div>
       <p id="adminErr" class="err-text hidden"></p>
       <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">Log In</button>
       <button class="btn btn-ghost" style="width:100%" onclick="showScreen('screen-admin-landing')">&larr; Back</button>
@@ -126,7 +127,9 @@
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
           <div style="display:flex;gap:10px;flex:1;flex-wrap:wrap">
+            <label class="sr-only" for="bookSearch">Search books</label>
             <input id="bookSearch" placeholder="Search title, author, ISBN..." style="max-width:320px" oninput="renderBooks()">
+            <label class="sr-only" for="bookCatFilter">Filter by category</label>
             <select id="bookCatFilter" style="width:170px" onchange="renderBooks()">
               <option value="">All Categories</option>
               <option>Fiction</option><option>Science</option><option>History</option><option>Reference</option>
@@ -142,6 +145,7 @@
     <div id="tab-students" class="tab-content">
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+          <label class="sr-only" for="studentSearch">Search students</label>
           <input id="studentSearch" placeholder="Search name, ID, course, section..." style="max-width:400px" oninput="renderStudents()">
           <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
         </div>
@@ -168,9 +172,9 @@
             <strong>Issue a Book</strong>
           </div>
           <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
-            <div><label class="lbl">Student *</label><select id="borrowStudent"><option value="">Select a student</option></select></div>
-            <div><label class="lbl">Book *</label><select id="borrowBook"><option value="">Select an available book</option></select></div>
-            <div><label class="lbl">Due Date</label><input id="borrowDue" type="date"><p class="hint">Defaults to 14 days from today.</p></div>
+            <div><label class="lbl" for="borrowStudent">Student *</label><select id="borrowStudent"><option value="">Select a student</option></select></div>
+            <div><label class="lbl" for="borrowBook">Book *</label><select id="borrowBook"><option value="">Select an available book</option></select></div>
+            <div><label class="lbl" for="borrowDue">Due Date</label><input id="borrowDue" type="date"><p class="hint">Defaults to 14 days from today.</p></div>
             <button class="btn btn-primary" style="width:100%" onclick="issueBorrow()">Issue Book</button>
           </div>
         </div>
@@ -189,6 +193,7 @@
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <strong style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" fill="none" stroke="var(--maroon)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Borrow History</strong>
+          <label class="sr-only" for="historyFilter">Filter history</label>
           <select id="historyFilter" style="width:170px" onchange="renderHistory()">
             <option value="all">All Records</option>
             <option value="borrowed">Borrowed</option>
@@ -203,25 +208,28 @@
   </main>
 </section>
 
+<footer class="site-footer"><a href="privacy.html">Privacy Notice</a> &middot; <a href="terms.html">Terms of Use</a></footer>
+
 <div class="overlay" id="addBookModal">
   <div class="modal">
     <h2>Add a new book</h2>
     <p class="sub">Add a book to the library collection.</p>
     <div style="display:flex;flex-direction:column;gap:16px">
-      <div><label class="lbl">Title *</label><input id="bTitle" placeholder="e.g. Noli Me Tangere"></div>
-      <div><label class="lbl">Author *</label><input id="bAuthor" placeholder="e.g. Jose Rizal"></div>
-      <div><label class="lbl">Category *</label>
+      <div><label class="lbl" for="bTitle">Title *</label><input id="bTitle" placeholder="e.g. Noli Me Tangere"></div>
+      <div><label class="lbl" for="bAuthor">Author *</label><input id="bAuthor" placeholder="e.g. Jose Rizal"></div>
+      <div><label class="lbl" for="bCategory">Category *</label>
         <div style="display:flex;gap:8px;align-items:center">
           <select id="bCategory" style="flex:1"><option>Fiction</option><option>Science</option><option>History</option><option>Reference</option></select>
+          <label class="sr-only" for="bNewCat">New category name</label>
           <input id="bNewCat" placeholder="New category" style="flex:1">
-          <button class="btn btn-outline" style="padding:10px 12px;flex-shrink:0" onclick="addCategory()" title="Add category">+</button>
+          <button class="btn btn-outline" style="padding:10px 12px;flex-shrink:0" onclick="addCategory()" title="Add category" aria-label="Add new category">+</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label class="lbl">ISBN *</label><input id="bISBN" placeholder="978-..."></div>
-        <div><label class="lbl">Total Copies</label><input id="bCopies" type="number" min="1" value="1"></div>
+        <div><label class="lbl" for="bISBN">ISBN *</label><input id="bISBN" placeholder="978-..."></div>
+        <div><label class="lbl" for="bCopies">Total Copies</label><input id="bCopies" type="number" min="1" value="1"></div>
       </div>
-      <div><label class="lbl">Description</label><textarea id="bDesc" rows="3" placeholder="Short description..."></textarea></div>
+      <div><label class="lbl" for="bDesc">Description</label><textarea id="bDesc" rows="3" placeholder="Short description..."></textarea></div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
       <button class="btn btn-outline" onclick="closeModal('addBookModal')">Cancel</button>
@@ -235,14 +243,14 @@
     <h2>Register a new student</h2>
     <p class="sub">Add a student so they can borrow books.</p>
     <div style="display:flex;flex-direction:column;gap:16px">
-      <div><label class="lbl">Full Name *</label><input id="sName"></div>
-      <div><label class="lbl">Student ID *</label><input id="sId" maxlength="11" oninput="formatSid(this)"><p class="hint">Format: 25-XXXX-XXX</p></div>
-      <div><label class="lbl">Temporary Password *</label><input id="sPassword" type="password" placeholder="••••••"><p class="hint">At least 6 characters. The student can change it later in Settings.</p></div>
+      <div><label class="lbl" for="sName">Full Name *</label><input id="sName"></div>
+      <div><label class="lbl" for="sId">Student ID *</label><input id="sId" maxlength="11" oninput="formatSid(this)"><p class="hint">Format: 25-XXXX-XXX</p></div>
+      <div><label class="lbl" for="sPassword">Temporary Password *</label><input id="sPassword" type="password" placeholder="••••••"><p class="hint">At least 6 characters. The student can change it later in Settings.</p></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label class="lbl">Year Level *</label><select id="sYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option></select></div>
-        <div><label class="lbl">Section *</label><input id="sSection"></div>
+        <div><label class="lbl" for="sYear">Year Level *</label><select id="sYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option></select></div>
+        <div><label class="lbl" for="sSection">Section *</label><input id="sSection"></div>
       </div>
-      <div><label class="lbl">Course *</label>
+      <div><label class="lbl" for="sCourse">Course *</label>
         <select id="sCourse">
           <option>BS Information Technology</option><option>BS Computer Science</option>
           <option>BS Computer Engineering</option><option>BS Accountancy</option>

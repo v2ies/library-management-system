@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Terms of Use — UPHSD Molino Library Management System</title>
+<meta name="description" content="Terms of use for the UPHSD Molino Library Management System class project."/>
+<link rel="stylesheet" href="styles.css"/>
+<script>
+(function(){try{
+var t=localStorage.getItem('uphsd_theme');
+var dark = t==='dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+if(dark){document.documentElement.setAttribute('data-theme','dark');}
+}catch(e){}})();
+function toggleTheme(){
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  if(isDark){document.documentElement.removeAttribute('data-theme');try{localStorage.setItem('uphsd_theme','light')}catch(e){}}
+  else{document.documentElement.setAttribute('data-theme','dark');try{localStorage.setItem('uphsd_theme','dark')}catch(e){}}
+}
+</script>
+</head>
+<body>
+<button class="theme-toggle theme-float" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
+
+<div class="legal-wrap">
+<a class="back-link" href="index.html">&larr; Back to the app</a>
+<p class="legal-eyebrow">UPHSD Molino Library Management System</p>
+<h1>Terms of Use</h1>
+<p class="legal-updated">Last updated: [fill in the date you publish this]</p>
+
+<div class="card">
+<h2>1. What this is</h2>
+<p>This site is a student class project (a library-management demo built with plain HTML/CSS/
+JavaScript, storing data only in your browser). It is <strong>not an official system of
+University of Perpetual Help System DALTA</strong>, is not run by UPHSD, and does not manage
+real library records. "UPHSD Molino" branding is used only to identify the academic context of
+the assignment, not to claim endorsement by the school.</p>
+</div>
+
+<div class="card">
+<h2>2. No warranty</h2>
+<p>The project is provided "as is," for demonstration purposes, with no guarantee of uptime,
+accuracy, or fitness for any real library-management use. Data can be lost at any time (e.g. if
+you clear browser storage) and there is no backup.</p>
+</div>
+
+<div class="card">
+<h2>3. Acceptable use</h2>
+<ul>
+<li>Don't enter real sensitive personal data beyond what the registration form asks for.</li>
+<li>Don't use this project to impersonate another student or submit false records.</li>
+<li>Don't try to interfere with, scrape at scale, or attack the hosting service (GitHub Pages).</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>4. Book data</h2>
+<p>The books, categories, and borrowing records in this demo are sample/test data (or entered by
+class members for demonstration) and don't represent an actual library catalog.</p>
+</div>
+
+<div class="card">
+<h2>5. Intellectual property</h2>
+<p>Code in this repository belongs to its student authors unless the repository states an
+open-source license, in which case that license governs reuse. The university name and any logo
+shown are the property of University of Perpetual Help System DALTA and are used here solely to
+identify the assignment's subject; no ownership of that name or mark is claimed.</p>
+</div>
+
+<div class="card">
+<h2>6. Changes</h2>
+<p>These terms may be updated as the project changes for coursework purposes.</p>
+</div>
+
+<div class="card">
+<h2>7. Governing law</h2>
+<p>These terms are intended to be read under the laws of the Republic of the Philippines,
+consistent with the project's academic context.</p>
+</div>
+
+<div class="card">
+<h2>8. Contact</h2>
+<p>Questions: <a href="mailto:group4@uphsd.edu.ph">group4@uphsd.edu.ph</a></p>
+</div>
+</div>
+
+<footer class="site-footer"><a href="index.html">Back to the app</a> &middot; <a href="privacy.html">Privacy Notice</a></footer>
+</body>
+</html>
