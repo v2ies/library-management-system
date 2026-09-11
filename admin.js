@@ -1,5 +1,4 @@
 const ADMIN_CREDENTIALS = { username: 'admin', password: 'library123' };
-const LOAN_DAYS = 14;
 
 function addCategory() {
   const input = document.getElementById('bNewCat');
@@ -116,17 +115,21 @@ function renderDashboard() {
   const borrowed = totalCopies - availCopies;
   const util = totalCopies ? Math.round(borrowed / totalCopies * 100) : 0;
 
+  const outstandingFines = active.reduce((a, r) => a + fineFor(r), 0);
+
   const cards = [
     { label: 'Total Books', value: books().length, sub: `${totalCopies} copies in library`, color: '#7a0c0c', ic: 'book' },
     { label: 'Students', value: students().length, sub: 'Registered members', color: '#8a6a00', ic: 'users' },
     { label: 'Active Borrows', value: active.length, sub: `${pending.length} pending request(s)`, color: '#6b3fa0', ic: 'open' },
     { label: 'Overdue', value: overdue.length, sub: 'Needs attention', color: '#b3261e', ic: 'clock' },
+    { label: 'Outstanding Fines', value: '₱' + outstandingFines, sub: overdue.length ? `${overdue.length} overdue loan(s)` : 'No overdue loans', color: '#8e1e18', ic: 'fine' },
   ];
   const icons = {
     book: `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
     users: `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>`,
     open: `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
     clock: `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    fine: `<svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 10v.01M18 14v.01"/></svg>`,
   };
   document.getElementById('statCards').innerHTML = cards.map(c => `
     <div class="stat-card">
@@ -141,6 +144,10 @@ function renderDashboard() {
     </div>`).join('');
 
   const cats = getCategories();
+  const bookCounts = {};
+  recs.forEach(r => { if (r.status !== 'pending') bookCounts[r.bookId] = (bookCounts[r.bookId] || 0) + 1; });
+  const topBooks = Object.entries(bookCounts).sort((a, b) => b[1] - a[1]).slice(0, 3)
+    .map(([bId, count]) => ({ bk: bookById(bId), count })).filter(t => t.bk);
   const catData = cats.map(cat => {
     const bs = books().filter(b => b.category === cat);
     const tot = bs.reduce((a, b) => a + b.totalCopies, 0);
@@ -167,6 +174,14 @@ function renderDashboard() {
         <div><p style="margin:0 0 2px;font-size:14px;font-weight:700">Overall Utilization</p><p style="margin:0;font-size:12px;color:var(--muted)">${borrowed} of ${totalCopies} copies currently out</p></div>
         <span style="font-size:28px;font-weight:800;color:var(--maroon)">${util}%</span>
       </div>
+      ${topBooks.length ? `<div>
+        <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:var(--ink-soft)">Most Borrowed</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+        ${topBooks.map((t, i) => `<div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
+          <span>${i + 1}. ${esc(t.bk.title)}</span><span style="color:var(--muted)">${t.count}×</span>
+        </div>`).join('')}
+        </div>
+      </div>` : ''}
     </div>`;
 
   const recent = recs.slice().sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate)).slice(0, 7);
@@ -204,13 +219,18 @@ function renderBooks() {
   if (!filtered.length) { grid.innerHTML = emptyBox('book', 'No books found', 'Try adjusting filters or add a new book.'); return; }
   grid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">${filtered.map(b => {
     const st = catStyle(b.category), av = b.availableCopies > 0;
-    return `<div class="card"><div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+    const wCount = waitlist().filter(w => w.bookId === b.id).length;
+    return `<div class="card" style="display:flex;flex-direction:column;height:100%"><div style="height:84px;background:${st.color};position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:8px;background:rgba(0,0,0,.18)"></div>
+      <span style="font-size:28px;font-weight:800;color:#fff;letter-spacing:.02em">${esc((b.title[0] || '?').toUpperCase())}</span>
+    </div><div style="padding:20px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="badge ${st.badge}"><span class="dot" style="background:${st.color}"></span>${b.category}</span>
         <button class="icon-btn" title="Delete" onclick="deleteBook('${b.id}')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
       </div>
-      <div><h3 style="font-size:15px;font-weight:800;line-height:1.3">${esc(b.title)}</h3><p style="margin:4px 0 0;font-size:13px;color:var(--muted)">by ${esc(b.author)}</p></div>
-      ${b.description ? `<p style="margin:0;font-size:12px;color:#b0a596;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(b.description)}</p>` : ''}
+      <div style="flex:1"><h3 style="font-size:15px;font-weight:800;line-height:1.3">${esc(b.title)}</h3><p style="margin:4px 0 0;font-size:13px;color:var(--muted)">by ${esc(b.author)}</p>
+      ${b.description ? `<p style="margin:8px 0 0;font-size:12px;color:#b0a596;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(b.description)}</p>` : ''}
+      ${wCount ? `<span class="badge" style="margin-top:8px;background:var(--purple-tint);color:var(--purple);align-self:flex-start">${wCount} waiting</span>` : ''}</div>
       <div style="border-top:1px solid #f2ece2;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:13px"><b style="color:${av ? 'var(--green)' : 'var(--red)'}">${b.availableCopies}</b> <span style="color:var(--muted)">/ ${b.totalCopies} available</span></span>
         <span style="font-family:monospace;font-size:10px;color:#b0a596">${esc(b.isbn)}</span>
@@ -356,7 +376,7 @@ function renderBorrow() {
         <td><div style="display:flex;flex-direction:column;gap:2px">
           <div style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:${cs.color}"></span><span style="font-weight:700;font-size:14px">${esc(st.name)}</span></div>
           <div style="padding-left:14px;font-size:12px;color:var(--muted)">${esc(bk.title)}</div></div></td>
-        <td><span style="color:${ov ? 'var(--red)' : 'var(--muted)'};font-weight:${ov ? '700' : '400'};font-size:13px">${r.dueDate}</span>${ov ? '<br><span class="badge b-overdue" style="font-size:10px;margin-top:2px">Overdue</span>' : ''}</td>
+        <td><span style="color:${ov ? 'var(--red)' : 'var(--muted)'};font-weight:${ov ? '700' : '400'};font-size:13px">${r.dueDate}</span>${ov ? `<br><span class="badge b-overdue" style="font-size:10px;margin-top:2px">Overdue · ₱${fineFor(r)}</span>` : ''}</td>
         <td style="text-align:right"><div style="display:flex;gap:6px;justify-content:flex-end">
           <button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="printSlipForRecord('${r.id}')">Print Slip</button>
           <button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="returnBook('${r.id}')">Return</button>
@@ -380,9 +400,10 @@ function issueBorrow() {
 function returnBook(id) {
   const r = records().find(x => x.id === id); if (!r) return;
   r.status = 'returned'; r.returnDate = today();
+  const fine = fineFor(r);
   const bk = bookById(r.bookId); if (bk) bk.availableCopies++;
   save();
-  toast('Book returned', `"${bk ? bk.title : 'Book'}" has been returned.`);
+  toast('Book returned', fine > 0 ? `"${bk ? bk.title : 'Book'}" returned — ₱${fine} overdue fine applies.` : `"${bk ? bk.title : 'Book'}" has been returned.`);
   renderBorrow(); renderDashboard(); if (session.role === 'student') renderStudentPortal();
 }
 
@@ -403,17 +424,19 @@ function renderHistory() {
   const el = document.getElementById('historyTable');
   if (!filtered.length) { el.innerHTML = emptyBox('clock', 'No history records', 'Borrowing activity will show here.'); return; }
   el.innerHTML = `<div style="max-height:540px;overflow:auto"><table>
-    <thead><tr><th>Student</th><th>Book</th><th>Borrowed</th><th>Due / Returned</th><th style="text-align:center">Status</th><th style="text-align:right">Action</th></tr></thead>
+    <thead><tr><th>Student</th><th>Book</th><th>Borrowed</th><th>Due / Returned</th><th style="text-align:right">Fine</th><th style="text-align:center">Status</th><th style="text-align:right">Action</th></tr></thead>
     <tbody>${filtered.map(r => {
       const bk = bookById(r.bookId), st = studentById(r.studentId);
       if (!bk || !st) return '';
       const cs = catStyle(bk.category);
       const dateCol = r.returnDate ? `<span style="color:var(--green)">${r.returnDate}</span>` : `<span style="color:${r.status === 'overdue' ? 'var(--red)' : 'var(--muted)'}">${r.dueDate || '—'}</span>`;
+      const fine = fineFor(r);
       return `<tr>
         <td><div style="display:flex;align-items:center;gap:8px">${avatarHTML(st.name, st.photo, 32, 12)}<div><p style="margin:0;font-size:13px;font-weight:700">${esc(st.name)}</p><p style="margin:0;font-size:11px;color:#b0a596">${esc(st.studentId)}</p></div></div></td>
         <td><div style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:${cs.color}"></span><div><p style="margin:0;font-size:13px;font-weight:600">${esc(bk.title)}</p><p style="margin:0;font-size:11px;color:#b0a596">${esc(bk.author)}</p></div></div></td>
         <td style="font-size:12px;color:var(--muted)">${r.borrowDate || '—'}</td>
         <td style="font-size:12px">${dateCol}</td>
+        <td style="text-align:right;font-size:12.5px;font-weight:700;color:${fine > 0 ? 'var(--red)' : 'var(--muted)'}">${fine > 0 ? '₱' + fine : '—'}</td>
         <td style="text-align:center">${statusBadge(r.status)}</td>
         <td style="text-align:right"><div style="display:flex;gap:6px;justify-content:flex-end">
           ${(r.status === 'borrowed' || r.status === 'overdue') ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="printSlipForRecord('${r.id}')">Print Slip</button>` : ''}
@@ -430,6 +453,51 @@ function deleteRecord(id) {
     save(); toast('Record deleted', 'The borrow record has been removed.');
     renderHistory(); renderDashboard(); updateReqBadge();
   });
+}
+
+function csvEscape(v) {
+  v = String(v == null ? '' : v);
+  return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function exportHistoryCSV() {
+  const recs = records().filter(r => r.status !== 'pending');
+  const rows = [['Student Name', 'Student ID', 'Book Title', 'Author', 'Category', 'Borrowed', 'Due / Returned', 'Status', 'Fine (PHP)']];
+  recs.forEach(r => {
+    const bk = bookById(r.bookId), st = studentById(r.studentId);
+    if (!bk || !st) return;
+    rows.push([st.name, st.studentId, bk.title, bk.author, bk.category, r.borrowDate || '', r.returnDate || r.dueDate || '', r.status, fineFor(r)]);
+  });
+  if (rows.length === 1) { toast('Nothing to export', 'There is no borrow history yet.', true); return; }
+  const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+  downloadFile('library-history-' + today() + '.csv', csv, 'text/csv');
+  toast('CSV exported', `${rows.length - 1} record(s) downloaded.`);
+}
+
+function exportBackup() {
+  downloadFile('uphsd-library-backup-' + today() + '.json', JSON.stringify(DB, null, 2), 'application/json');
+  toast('Backup downloaded', 'Keep this file safe — it contains all books, students, and records.');
+}
+function importBackupFile(input) {
+  const file = input.files && input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); } catch (e) { toast('Invalid file', 'Could not read that file as a backup.', true); return; }
+    if (!data || !Array.isArray(data.books) || !Array.isArray(data.students) || !Array.isArray(data.records)) {
+      toast('Invalid file', "This doesn't look like a valid library backup.", true); return;
+    }
+    openConfirm('Restore this backup?', 'This will replace all current books, students, and records with the data in this file.', () => {
+      DB = data;
+      if (!Array.isArray(DB.waitlist)) DB.waitlist = [];
+      if (!DB.counters) DB.counters = { b: 9, s: 1, r: 1, w: 1 };
+      if (DB.counters.w == null) DB.counters.w = 1;
+      save();
+      toast('Backup restored', 'The library data has been replaced.');
+      switchTab('dashboard', document.querySelector('#screen-admin .tab-btn'));
+    });
+  };
+  reader.readAsText(file);
+  input.value = '';
 }
 
 boot();

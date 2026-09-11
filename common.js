@@ -37,15 +37,37 @@ function seed(){return{books:[
   {id:'b6',title:'Cosmos',author:'Carl Sagan',category:'Science',isbn:'978-0345539434',description:'A personal voyage through the universe.',totalCopies:3,availableCopies:2},
   {id:'b7',title:'Oxford English Dictionary',author:'Oxford University Press',category:'Reference',isbn:'978-0199571123',description:'Comprehensive reference dictionary.',totalCopies:5,availableCopies:5},
   {id:'b8',title:'Florante at Laura',author:'Francisco Balagtas',category:'Fiction',isbn:'978-9712300011',description:'A classic Filipino awit.',totalCopies:3,availableCopies:3}
-],students:[],records:[],counters:{b:9,s:1,r:1},customCategories:[]}}
+],students:[],records:[],waitlist:[],counters:{b:9,s:1,r:1,w:1},customCategories:[]}}
 
 let DB=load();
-function load(){try{const raw=localStorage.getItem(STORE_KEY);if(raw)return JSON.parse(raw)}catch(e){}const fresh=seed();persist(fresh);return fresh}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){
+      const db=JSON.parse(raw);
+      if(db&&typeof db==='object'){
+        if(!Array.isArray(db.waitlist))db.waitlist=[];
+        if(!db.counters)db.counters={b:9,s:1,r:1,w:1};
+        if(db.counters.w==null)db.counters.w=1;
+        return db;
+      }
+    }
+  }catch(e){}
+  const fresh=seed();persist(fresh);return fresh;
+}
 function persist(db){localStorage.setItem(STORE_KEY,JSON.stringify(db||DB))}
 function save(){persist(DB)}
 
-const books=()=>DB.books,students=()=>DB.students,records=()=>DB.records;
+const books=()=>DB.books,students=()=>DB.students,records=()=>DB.records,waitlist=()=>DB.waitlist;
 const bookById=id=>DB.books.find(b=>b.id===id),studentById=id=>DB.students.find(s=>s.id===id);
+
+function downloadFile(filename,content,mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},0);
+}
 
 function getCategories(){return[...new Set([...DEFAULT_CATEGORIES,...(DB.customCategories||[]),...books().map(b=>b.category)])]}
 function refreshCategorySelects(){
@@ -101,6 +123,16 @@ function statusBadge(s){
 }
 function today(){return new Date().toISOString().slice(0,10)}
 function plusDays(n){return new Date(Date.now()+n*864e5).toISOString().slice(0,10)}
+const LOAN_DAYS=14;
+const FINE_PER_DAY=10;
+function daysLate(r){
+  if(!r.dueDate)return 0;
+  const due=new Date(r.dueDate+'T00:00:00');
+  const end=r.returnDate?new Date(r.returnDate+'T00:00:00'):new Date();
+  const diff=Math.floor((end-due)/864e5);
+  return diff>0?diff:0;
+}
+function fineFor(r){return daysLate(r)*FINE_PER_DAY}
 
 function printSlipForRecord(id){
   const r=records().find(x=>x.id===id);if(!r)return;
@@ -205,5 +237,5 @@ function boot(){
   session=loadSession();
   const isAdminPage=!!document.getElementById('screen-admin'),isIndexPage=!!document.getElementById('screen-landing');
   if(isAdminPage){if(session.role==='admin'){showScreen('screen-admin');switchTab('dashboard',document.querySelector('#screen-admin .tab-btn'))}else showScreen('screen-admin-landing');return}
-  if(isIndexPage){if(session.role==='student'&&studentById(session.studentId)){showScreen('screen-student');switchStuTab('browse',document.querySelector('#screen-student .tab-btn'));renderStudentPortal()}else{saveSession({role:null,studentId:null});showScreen('screen-landing')}}
+  if(isIndexPage){if(session.role==='student'&&studentById(session.studentId)){showScreen('screen-student');switchStuTab('browse',document.querySelector('#screen-student .tab-btn'));renderStudentPortal();if(typeof checkDueSoon==='function')checkDueSoon(session.studentId);if(typeof checkWaitlistReady==='function')checkWaitlistReady(session.studentId)}else{saveSession({role:null,studentId:null});showScreen('screen-landing')}}
 }

@@ -45,7 +45,7 @@ function enterStudent(sId,silent){
   saveSession({role:'student',studentId:sId});
   if(!document.getElementById('screen-student')){window.location.href='index.html';return}
   showScreen('screen-student');switchStuTab('browse',document.querySelector('#screen-student .tab-btn'));renderStudentPortal();
-  if(!silent){const s=studentById(sId);if(s)toast('Welcome, '+s.name.split(' ')[0],'Browse and request books from the library.')}
+  if(!silent){const s=studentById(sId);if(s)toast('Welcome, '+s.name.split(' ')[0],'Browse and request books from the library.');checkDueSoon(sId);checkWaitlistReady(sId)}
 }
 
 function switchStuTab(name,btn){
@@ -106,6 +106,7 @@ function saveStuSettings(){
 }
 
 function renderStuBrowse(){
+  renderStuWaitlist();
   const searchEl=document.getElementById('stuBookSearch'),catEl=document.getElementById('stuCatFilter'),grid0=document.getElementById('stuBooksGrid');
   if(!searchEl||!catEl||!grid0)return;
   const search=(searchEl.value||'').toLowerCase(),cat=catEl.value;
@@ -116,12 +117,17 @@ function renderStuBrowse(){
   grid.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">${filtered.map(b=>{
     const st=catStyle(b.category),av=b.availableCopies>0;
     const existing=my.find(r=>r.bookId===b.id&&(r.status==='pending'||r.status==='borrowed'||r.status==='overdue'));
+    const onWaitlist=waitlist().some(w=>w.bookId===b.id&&w.studentId===session.studentId);
     let action;
     if(existing&&existing.status==='pending')action=`<button class="btn btn-outline" style="width:100%;cursor:default" disabled>Request Pending</button>`;
     else if(existing)action=`<button class="btn btn-outline" style="width:100%;cursor:default" disabled>Already Borrowed</button>`;
-    else if(!av)action=`<button class="btn btn-outline" style="width:100%;opacity:.6;cursor:not-allowed" disabled>Out of Stock</button>`;
+    else if(!av&&onWaitlist)action=`<button class="btn btn-outline" style="width:100%;cursor:default" disabled>On Waitlist</button>`;
+    else if(!av)action=`<button class="btn btn-outline" style="width:100%" onclick="joinWaitlist('${b.id}')">Notify Me When Available</button>`;
     else action=`<button class="btn btn-gold" style="width:100%" onclick="openBorrowRules('${b.id}')">Request to Borrow</button>`;
-    return`<div class="card"><div style="padding:20px;display:flex;flex-direction:column;gap:12px;height:100%">
+    return`<div class="card" style="display:flex;flex-direction:column;height:100%"><div style="height:84px;background:${st.color};position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:8px;background:rgba(0,0,0,.18)"></div>
+      <span style="font-size:28px;font-weight:800;color:#fff;letter-spacing:.02em">${esc((b.title[0]||'?').toUpperCase())}</span>
+    </div><div style="padding:20px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0">
       <span class="badge ${st.badge}" style="align-self:flex-start"><span class="dot" style="background:${st.color}"></span>${b.category}</span>
       <div style="flex:1"><h3 style="font-size:15px;font-weight:800;line-height:1.3">${esc(b.title)}</h3><p style="margin:4px 0 0;font-size:13px;color:var(--muted)">by ${esc(b.author)}</p>
       ${b.description?`<p style="margin:8px 0 0;font-size:12px;color:#b0a596;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${esc(b.description)}</p>`:''}</div>
@@ -156,20 +162,83 @@ function renderStuMyBooks(){
   const my=records().filter(r=>r.studentId===session.studentId).sort((a,b)=>new Date(b.requestDate)-new Date(a.requestDate));
   if(!my.length){el.innerHTML=emptyBox('open','No books yet','Request a book from the Browse tab.');return}
   el.innerHTML=`<div style="overflow-x:auto"><table>
-    <thead><tr><th>Book</th><th>Requested</th><th>Due Date</th><th style="text-align:center">Status</th><th style="text-align:right">Slip</th></tr></thead>
+    <thead><tr><th>Book</th><th>Requested</th><th>Due Date</th><th style="text-align:right">Fine</th><th style="text-align:center">Status</th><th style="text-align:right">Actions</th></tr></thead>
     <tbody>${my.map(r=>{
       const bk=bookById(r.bookId);if(!bk)return'';
       const cs=catStyle(bk.category);
       const due=r.returnDate?`Returned ${r.returnDate}`:(r.dueDate||'—');
       const canPrint=r.status==='borrowed'||r.status==='overdue';
+      const canRenew=r.status==='borrowed'&&!r.renewed;
+      const fine=fineFor(r);
       return`<tr>
         <td><div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:${cs.color}"></span><div><p style="margin:0;font-size:13px;font-weight:700">${esc(bk.title)}</p><p style="margin:0;font-size:11px;color:#b0a596">by ${esc(bk.author)} · ${bk.category}</p></div></div></td>
         <td style="font-size:12px;color:var(--muted)">${r.requestDate}</td>
         <td style="font-size:12px;color:${r.status==='overdue'?'var(--red)':'var(--muted)'};font-weight:${r.status==='overdue'?'700':'400'}">${due}</td>
+        <td style="text-align:right;font-size:12px;font-weight:700;color:${fine>0?'var(--red)':'var(--muted)'}">${fine>0?'₱'+fine:'—'}</td>
         <td style="text-align:center">${statusBadge(r.status)}</td>
-        <td style="text-align:right">${canPrint?`<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="printSlipForRecord('${r.id}')">Print</button>`:''}</td>
+        <td style="text-align:right"><div style="display:flex;gap:6px;justify-content:flex-end">
+          ${canRenew?`<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="renewBook('${r.id}')">Renew</button>`:''}
+          ${canPrint?`<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="printSlipForRecord('${r.id}')">Print</button>`:''}
+        </div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
+}
+
+function renewBook(id){
+  const r=records().find(x=>x.id===id);if(!r)return;
+  if(r.status!=='borrowed'){toast('Cannot renew','Only current, non-overdue borrows can be renewed.',true);return}
+  if(r.renewed){toast('Already renewed','This book has already been renewed once. Please return it by the due date.',true);return}
+  r.dueDate=plusDays(LOAN_DAYS);r.renewed=true;save();
+  toast('Renewed','New due date: '+r.dueDate+'.');
+  renderStudentPortal();
+}
+
+function checkDueSoon(sId){
+  const soon=records().filter(r=>r.studentId===sId&&r.status==='borrowed'&&r.dueDate);
+  const dueSoon=soon.filter(r=>{const d=Math.floor((new Date(r.dueDate+'T00:00:00')-new Date())/864e5);return d>=0&&d<=2});
+  if(!dueSoon.length)return;
+  const bk=bookById(dueSoon[0].bookId);
+  toast('Due soon',dueSoon.length===1?`"${bk?bk.title:'A book'}" is due ${dueSoon[0].dueDate}.`:`${dueSoon.length} books are due within 2 days.`,true);
+}
+
+function checkWaitlistReady(sId){
+  const mine=waitlist().filter(w=>w.studentId===sId);
+  if(!mine.length)return;
+  const ready=mine.filter(w=>{const bk=bookById(w.bookId);return bk&&bk.availableCopies>0});
+  if(!ready.length)return;
+  const bk=bookById(ready[0].bookId);
+  toast('Now available!',ready.length===1?`"${bk?bk.title:'A book'}" is back in stock — request it before it's gone.`:`${ready.length} books you're waiting on are now available.`);
+  DB.waitlist=DB.waitlist.filter(w=>!ready.includes(w));
+  save();
+}
+
+function joinWaitlist(bId){
+  const bk=bookById(bId);if(!bk)return;
+  if(waitlist().some(w=>w.bookId===bId&&w.studentId===session.studentId)){toast('Already on waitlist',"We'll let you know when a copy is available.",true);return}
+  DB.waitlist.push({id:'w'+DB.counters.w++,studentId:session.studentId,bookId:bId,date:today()});
+  save();toast('Added to waitlist',`We'll let you know when "${bk.title}" is back in stock.`);
+  renderStuBrowse();
+}
+function leaveWaitlist(wId){
+  DB.waitlist=DB.waitlist.filter(w=>w.id!==wId);save();
+  toast('Removed from waitlist','');
+  renderStuBrowse();
+}
+function renderStuWaitlist(){
+  const box=document.getElementById('stuWaitlistBox');if(!box)return;
+  const mine=waitlist().filter(w=>w.studentId===session.studentId);
+  if(!mine.length){box.classList.add('hidden');box.innerHTML='';return}
+  box.classList.remove('hidden');
+  box.innerHTML=`<div class="card"><div style="padding:12px 16px;border-bottom:1px solid var(--line)"><strong style="font-size:13px">Your Waitlist</strong></div>
+    <div style="padding:8px 16px 12px;display:flex;flex-direction:column;gap:6px">
+    ${mine.map(w=>{
+      const bk=bookById(w.bookId);if(!bk)return'';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:10px">
+        <span>${esc(bk.title)}${bk.availableCopies>0?' <span style="color:var(--green);font-weight:700">· Available now</span>':''}</span>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11.5px" onclick="leaveWaitlist('${w.id}')">Remove</button>
+      </div>`;
+    }).join('')}
+    </div></div>`;
 }
 
 boot();

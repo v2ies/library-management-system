@@ -116,6 +116,12 @@
     </div>
 
     <div id="tab-dashboard" class="tab-content active">
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <label class="sr-only" for="importBackupInput">Import backup file</label>
+        <input type="file" id="importBackupInput" accept="application/json" style="display:none" onchange="importBackupFile(this)">
+        <button class="btn btn-outline" style="font-size:12.5px;padding:8px 14px" onclick="document.getElementById('importBackupInput').click()">Import Backup</button>
+        <button class="btn btn-outline" style="font-size:12.5px;padding:8px 14px" onclick="exportBackup()">Export Backup</button>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:20px" id="statCards"></div>
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px" id="dashBottom">
         <div class="card" id="categoryCard"></div>
@@ -193,13 +199,16 @@
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <strong style="display:flex;align-items:center;gap:8px"><svg width="16" height="16" fill="none" stroke="var(--maroon)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Borrow History</strong>
-          <label class="sr-only" for="historyFilter">Filter history</label>
-          <select id="historyFilter" style="width:170px" onchange="renderHistory()">
-            <option value="all">All Records</option>
-            <option value="borrowed">Borrowed</option>
-            <option value="returned">Returned</option>
-            <option value="overdue">Overdue</option>
-          </select>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <label class="sr-only" for="historyFilter">Filter history</label>
+            <select id="historyFilter" style="width:170px" onchange="renderHistory()">
+              <option value="all">All Records</option>
+              <option value="borrowed">Borrowed</option>
+              <option value="returned">Returned</option>
+              <option value="overdue">Overdue</option>
+            </select>
+            <button class="btn btn-outline" style="font-size:12.5px;padding:8px 14px" onclick="exportHistoryCSV()">Export CSV</button>
+          </div>
         </div>
         <div style="padding:0 16px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center" id="historyCounts"></div>
       </div>
