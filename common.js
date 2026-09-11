@@ -102,6 +102,44 @@ function statusBadge(s){
 function today(){return new Date().toISOString().slice(0,10)}
 function plusDays(n){return new Date(Date.now()+n*864e5).toISOString().slice(0,10)}
 
+function printSlipForRecord(id){
+  const r=records().find(x=>x.id===id);if(!r)return;
+  const bk=bookById(r.bookId),st=studentById(r.studentId);
+  if(!bk||!st)return;
+  printSlip(st.name,bk.title,r.dueDate||'—');
+}
+function printSlip(name,book,due){
+  const w=window.open('','_blank','width=420,height=620');
+  if(!w){toast('Pop-up blocked','Please allow pop-ups for this site to print the slip.',true);return}
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Borrow Slip</title>
+<style>
+@page{size:auto;margin:14mm}
+body{font-family:'Cascadia Code',ui-monospace,Menlo,Consolas,monospace;color:#231a14;margin:0;padding:24px}
+.slip{max-width:360px;margin:0 auto;border:2px solid #6e1220;border-radius:10px;padding:22px 24px}
+.slip h1{font-size:15px;margin:0 0 2px;color:#6e1220;letter-spacing:.02em}
+.slip .sub{font-size:11px;color:#79705f;margin:0 0 16px}
+.rule{border:none;border-top:2px solid #a9812f;margin:14px 0}
+.row{margin:0 0 14px}
+.row .k{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#79705f;margin:0 0 3px}
+.row .v{font-size:15px;font-weight:700;color:#231a14}
+.sanction{background:#fbeced;border:1px solid #f0c3bd;border-radius:8px;padding:10px 12px;font-size:12px;color:#8e1e18;font-weight:700}
+.foot{margin-top:18px;font-size:10px;color:#a89d8a;text-align:center}
+</style></head><body>
+<div class="slip">
+<h1>UPHSD MOLINO LIBRARY</h1>
+<p class="sub">Borrower's Slip &middot; Class Project</p>
+<hr class="rule">
+<div class="row"><p class="k">Borrower Name</p><p class="v">${esc(name)}</p></div>
+<div class="row"><p class="k">Book Title</p><p class="v">${esc(book)}</p></div>
+<div class="row"><p class="k">Due Date</p><p class="v">${esc(due)}</p></div>
+<div class="sanction">Sanction: &#8369;10.00 for every day overdue</div>
+<p class="foot">Issued ${esc(new Date().toLocaleDateString())}</p>
+</div>
+<script>window.onload=function(){window.print()}<\/script>
+</body></html>`;
+  w.document.write(html);w.document.close();
+}
+
 function formatSid(input){let v=input.value.replace(/\D/g,'').slice(0,9);let out=v.slice(0,2);if(v.length>2)out+='-'+v.slice(2,6);if(v.length>6)out+='-'+v.slice(6,9);input.value=out}
 function validSid(sid){return/^25-\d{4}-\d{3}$/.test(sid)}
 function validPassword(pw){return typeof pw==='string'&&pw.length>=6}

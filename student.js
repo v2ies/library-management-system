@@ -120,7 +120,7 @@ function renderStuBrowse(){
     if(existing&&existing.status==='pending')action=`<button class="btn btn-outline" style="width:100%;cursor:default" disabled>Request Pending</button>`;
     else if(existing)action=`<button class="btn btn-outline" style="width:100%;cursor:default" disabled>Already Borrowed</button>`;
     else if(!av)action=`<button class="btn btn-outline" style="width:100%;opacity:.6;cursor:not-allowed" disabled>Out of Stock</button>`;
-    else action=`<button class="btn btn-gold" style="width:100%" onclick="requestBook('${b.id}')">Request to Borrow</button>`;
+    else action=`<button class="btn btn-gold" style="width:100%" onclick="openBorrowRules('${b.id}')">Request to Borrow</button>`;
     return`<div class="card"><div style="padding:20px;display:flex;flex-direction:column;gap:12px;height:100%">
       <span class="badge ${st.badge}" style="align-self:flex-start"><span class="dot" style="background:${st.color}"></span>${b.category}</span>
       <div style="flex:1"><h3 style="font-size:15px;font-weight:800;line-height:1.3">${esc(b.title)}</h3><p style="margin:4px 0 0;font-size:13px;color:var(--muted)">by ${esc(b.author)}</p>
@@ -130,6 +130,19 @@ function renderStuBrowse(){
   }).join('')}</div>`;
 }
 
+let pendingBorrowBookId=null;
+function openBorrowRules(bId){
+  const bk=bookById(bId);if(!bk)return;
+  pendingBorrowBookId=bId;
+  const t=document.getElementById('borrowRulesBookTitle');if(t)t.textContent='"'+bk.title+'"';
+  openModal('borrowRulesModal');
+}
+function confirmBorrowRequest(){
+  if(!pendingBorrowBookId)return;
+  const bId=pendingBorrowBookId;pendingBorrowBookId=null;
+  closeModal('borrowRulesModal');
+  requestBook(bId);
+}
 function requestBook(bId){
   const bk=bookById(bId);if(!bk)return;
   const my=records().filter(r=>r.studentId===session.studentId);
@@ -143,16 +156,18 @@ function renderStuMyBooks(){
   const my=records().filter(r=>r.studentId===session.studentId).sort((a,b)=>new Date(b.requestDate)-new Date(a.requestDate));
   if(!my.length){el.innerHTML=emptyBox('open','No books yet','Request a book from the Browse tab.');return}
   el.innerHTML=`<div style="overflow-x:auto"><table>
-    <thead><tr><th>Book</th><th>Requested</th><th>Due Date</th><th style="text-align:center">Status</th></tr></thead>
+    <thead><tr><th>Book</th><th>Requested</th><th>Due Date</th><th style="text-align:center">Status</th><th style="text-align:right">Slip</th></tr></thead>
     <tbody>${my.map(r=>{
       const bk=bookById(r.bookId);if(!bk)return'';
       const cs=catStyle(bk.category);
       const due=r.returnDate?`Returned ${r.returnDate}`:(r.dueDate||'—');
+      const canPrint=r.status==='borrowed'||r.status==='overdue';
       return`<tr>
         <td><div style="display:flex;align-items:center;gap:8px"><span class="dot" style="background:${cs.color}"></span><div><p style="margin:0;font-size:13px;font-weight:700">${esc(bk.title)}</p><p style="margin:0;font-size:11px;color:#b0a596">by ${esc(bk.author)} · ${bk.category}</p></div></div></td>
         <td style="font-size:12px;color:var(--muted)">${r.requestDate}</td>
         <td style="font-size:12px;color:${r.status==='overdue'?'var(--red)':'var(--muted)'};font-weight:${r.status==='overdue'?'700':'400'}">${due}</td>
         <td style="text-align:center">${statusBadge(r.status)}</td>
+        <td style="text-align:right">${canPrint?`<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="printSlipForRecord('${r.id}')">Print</button>`:''}</td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }

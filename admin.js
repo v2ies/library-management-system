@@ -347,7 +347,7 @@ function renderBorrow() {
   const el = document.getElementById('activeBorrowsTable');
   if (!active.length) { el.innerHTML = emptyBox('open', 'No active borrows', 'Issued books will appear here.'); return; }
   el.innerHTML = `<div style="max-height:440px;overflow-y:auto"><table>
-    <thead><tr><th>Student / Book</th><th>Due</th><th style="text-align:right">Action</th></tr></thead>
+    <thead><tr><th>Student / Book</th><th>Due</th><th style="text-align:right">Actions</th></tr></thead>
     <tbody>${active.map(r => {
       const bk = bookById(r.bookId), st = studentById(r.studentId);
       if (!bk || !st) return '';
@@ -357,7 +357,10 @@ function renderBorrow() {
           <div style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:${cs.color}"></span><span style="font-weight:700;font-size:14px">${esc(st.name)}</span></div>
           <div style="padding-left:14px;font-size:12px;color:var(--muted)">${esc(bk.title)}</div></div></td>
         <td><span style="color:${ov ? 'var(--red)' : 'var(--muted)'};font-weight:${ov ? '700' : '400'};font-size:13px">${r.dueDate}</span>${ov ? '<br><span class="badge b-overdue" style="font-size:10px;margin-top:2px">Overdue</span>' : ''}</td>
-        <td style="text-align:right"><button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="returnBook('${r.id}')">Return</button></td>
+        <td style="text-align:right"><div style="display:flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-outline" style="padding:6px 10px;font-size:12px" onclick="printSlipForRecord('${r.id}')">Print Slip</button>
+          <button class="btn btn-outline" style="padding:6px 12px;font-size:13px" onclick="returnBook('${r.id}')">Return</button>
+        </div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }
@@ -412,7 +415,10 @@ function renderHistory() {
         <td style="font-size:12px;color:var(--muted)">${r.borrowDate || '—'}</td>
         <td style="font-size:12px">${dateCol}</td>
         <td style="text-align:center">${statusBadge(r.status)}</td>
-        <td style="text-align:right"><button class="icon-btn" onclick="deleteRecord('${r.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
+        <td style="text-align:right"><div style="display:flex;gap:6px;justify-content:flex-end">
+          ${(r.status === 'borrowed' || r.status === 'overdue') ? `<button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="printSlipForRecord('${r.id}')">Print Slip</button>` : ''}
+          <button class="icon-btn" onclick="deleteRecord('${r.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }

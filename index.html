@@ -31,6 +31,28 @@ if(dark){document.documentElement.setAttribute('data-theme','dark');}
 </div>
 </div>
 
+<div class="overlay" id="borrowRulesModal">
+<div class="modal" style="max-width:460px">
+<h2 style="font-size:19px;font-weight:800">Library Rules &amp; Regulations</h2>
+<p class="sub" style="margin-bottom:4px">Before requesting <b style="color:var(--ink)" id="borrowRulesBookTitle"></b>, please review and agree to the following:</p>
+<ul style="margin:18px 0 20px;padding-left:20px;display:flex;flex-direction:column;gap:9px">
+<li style="font-size:13.5px;color:var(--ink-soft)">Do not write, highlight, or mark on any page.</li>
+<li style="font-size:13.5px;color:var(--ink-soft)">Do not fold, tear, or bend the pages or cover.</li>
+<li style="font-size:13.5px;color:var(--ink-soft)">Keep the book away from food, drinks, and moisture.</li>
+<li style="font-size:13.5px;color:var(--ink-soft)">Return the book on or before the due date on your slip.</li>
+<li style="font-size:13.5px;color:var(--ink-soft)">Report any existing damage to the librarian before borrowing.</li>
+<li style="font-size:13.5px;color:var(--ink-soft)">Lost or damaged books must be replaced or paid for.</li>
+</ul>
+<div style="background:var(--red-tint);border:1px solid #f0c3bd;border-radius:10px;padding:10px 14px;font-size:12.5px;color:#8e1e18;font-weight:700;margin-bottom:20px">
+Overdue books are sanctioned &#8369;10.00 for every day late.
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px">
+<button class="btn btn-outline" onclick="closeModal('borrowRulesModal')">Cancel</button>
+<button class="btn btn-gold" onclick="confirmBorrowRequest()">I Agree — Request to Borrow</button>
+</div>
+</div>
+</div>
+
 <section class="screen" id="screen-landing">
 <div style="width:100%;max-width:720px;text-align:center">
 <h1 style="font-size:26px;font-weight:800">University of Perpetual Help System DALTA</h1>
