@@ -233,8 +233,9 @@ function renderBooks() {
       ${wCount ? `<span class="badge" style="margin-top:8px;background:var(--purple-tint);color:var(--purple);align-self:flex-start">${wCount} waiting</span>` : ''}</div>
       <div style="border-top:1px solid #f2ece2;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:13px"><b style="color:${av ? 'var(--green)' : 'var(--red)'}">${b.availableCopies}</b> <span style="color:var(--muted)">/ ${b.totalCopies} available</span></span>
-        <span style="font-family:monospace;font-size:10px;color:#b0a596">${esc(b.isbn)}</span>
+        <button class="btn btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="openRestock('${b.id}')">Restock</button>
       </div>
+      <span style="font-family:monospace;font-size:10px;color:#b0a596">${esc(b.isbn)}</span>
     </div></div>`;
   }).join('')}</div>`;
 }
@@ -498,6 +499,28 @@ function importBackupFile(input) {
   };
   reader.readAsText(file);
   input.value = '';
+}
+
+let restockBookId = null;
+function openRestock(bId) {
+  const bk = bookById(bId); if (!bk) return;
+  restockBookId = bId;
+  document.getElementById('restockBookTitle').textContent = bk.title;
+  document.getElementById('restockCurrent').textContent = `Currently ${bk.availableCopies} of ${bk.totalCopies} available.`;
+  document.getElementById('restockQty').value = 1;
+  const e = document.getElementById('restockErr'); if (e) e.classList.add('hidden');
+  openModal('restockModal');
+}
+function confirmRestock() {
+  const bk = bookById(restockBookId); if (!bk) return;
+  const qty = parseInt(document.getElementById('restockQty').value, 10);
+  const err = document.getElementById('restockErr');
+  if (!qty || qty < 1) { showErr(err, 'Enter a number of copies greater than 0.'); return; }
+  bk.totalCopies += qty; bk.availableCopies += qty;
+  save();
+  closeModal('restockModal');
+  toast('Book restocked', `Added ${qty} cop${qty === 1 ? 'y' : 'ies'} of "${bk.title}" — now ${bk.availableCopies} available.`);
+  renderBooks(); renderDashboard(); renderBorrow();
 }
 
 boot();

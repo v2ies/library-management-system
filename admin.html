@@ -219,6 +219,22 @@
 
 <footer class="site-footer"><a href="privacy.html">Privacy Notice</a> &middot; <a href="terms.html">Terms of Use</a></footer>
 
+<div class="overlay" id="restockModal">
+  <div class="modal" style="max-width:380px">
+    <h2 style="font-size:19px">Restock Book</h2>
+    <p class="sub" id="restockBookTitle" style="font-weight:700;color:var(--ink)"></p>
+    <p class="sub" id="restockCurrent" style="margin-top:-4px"></p>
+    <div style="display:flex;flex-direction:column;gap:16px;margin:6px 0 22px">
+      <div><label class="lbl" for="restockQty">Copies to Add *</label><input id="restockQty" type="number" min="1" value="1"></div>
+      <p id="restockErr" class="err-text hidden"></p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn btn-outline" onclick="closeModal('restockModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmRestock()">Add Copies</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="addBookModal">
   <div class="modal">
     <h2>Add a new book</h2>
