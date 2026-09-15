@@ -153,7 +153,10 @@
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
           <label class="sr-only" for="studentSearch">Search students</label>
           <input id="studentSearch" placeholder="Search name, ID, course, section..." style="max-width:400px" oninput="renderStudents()">
-          <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" style="font-size:12.5px;padding:10px 14px" onclick="exportStudentsCSV()">Export CSV</button>
+            <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
+          </div>
         </div>
       </div>
       <div class="card"><div id="studentsTable"></div></div>
@@ -231,6 +234,41 @@
     <div style="display:flex;justify-content:flex-end;gap:10px">
       <button class="btn btn-outline" onclick="closeModal('restockModal')">Cancel</button>
       <button class="btn btn-primary" onclick="confirmRestock()">Add Copies</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="editBookModal">
+  <div class="modal">
+    <h2>Edit Book</h2>
+    <p class="sub">Update this book's details.</p>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div><label class="lbl" for="bETitle">Title *</label><input id="bETitle"></div>
+      <div><label class="lbl" for="bEAuthor">Author *</label><input id="bEAuthor"></div>
+      <div><label class="lbl" for="bECategory">Category *</label><select id="bECategory"></select></div>
+      <div><label class="lbl" for="bEISBN">ISBN *</label><input id="bEISBN"></div>
+      <div><label class="lbl" for="bEDesc">Description</label><textarea id="bEDesc" rows="3"></textarea></div>
+      <p class="hint">To change the number of copies, use <b>Restock</b> on the book card instead.</p>
+      <p id="editBookErr" class="err-text hidden"></p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+      <button class="btn btn-outline" onclick="closeModal('editBookModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditBook()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="resetPassModal">
+  <div class="modal" style="max-width:380px">
+    <h2 style="font-size:19px">Reset Password</h2>
+    <p class="sub" id="resetPassStudentName" style="font-weight:700;color:var(--ink)"></p>
+    <div style="display:flex;flex-direction:column;gap:16px;margin:6px 0 22px">
+      <div><label class="lbl" for="resetPassNew">New Password *</label><input id="resetPassNew" type="password" placeholder="••••••"><p class="hint">At least 6 characters. Share this with the student directly.</p></div>
+      <p id="resetPassErr" class="err-text hidden"></p>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn btn-outline" onclick="closeModal('resetPassModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmResetPassword()">Reset Password</button>
     </div>
   </div>
 </div>

@@ -226,7 +226,10 @@ function renderBooks() {
     </div><div style="padding:20px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="badge ${st.badge}"><span class="dot" style="background:${st.color}"></span>${b.category}</span>
-        <button class="icon-btn" title="Delete" onclick="deleteBook('${b.id}')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
+        <div style="display:flex;gap:2px">
+          <button class="icon-btn" title="Edit" onclick="openEditBook('${b.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="icon-btn" title="Delete" onclick="deleteBook('${b.id}')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div>
       </div>
       <div style="flex:1"><h3 style="font-size:15px;font-weight:800;line-height:1.3">${esc(b.title)}</h3><p style="margin:4px 0 0;font-size:13px;color:var(--muted)">by ${esc(b.author)}</p>
       ${b.description ? `<p style="margin:8px 0 0;font-size:12px;color:#b0a596;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(b.description)}</p>` : ''}
@@ -261,9 +264,34 @@ function deleteBook(id) {
   openConfirm('Delete this book?', 'This removes the book and its borrow history permanently.', () => {
     DB.books = DB.books.filter(x => x.id !== id);
     DB.records = DB.records.filter(r => r.bookId !== id);
+    DB.waitlist = DB.waitlist.filter(w => w.bookId !== id);
     save(); toast('Book removed', 'The book has been deleted.');
     renderBooks(); renderDashboard(); updateReqBadge();
   });
+}
+
+let editBookId = null;
+function openEditBook(bId) {
+  const bk = bookById(bId); if (!bk) return;
+  editBookId = bId;
+  refreshCategorySelects();
+  document.getElementById('bETitle').value = bk.title;
+  document.getElementById('bEAuthor').value = bk.author;
+  document.getElementById('bECategory').value = bk.category;
+  document.getElementById('bEISBN').value = bk.isbn;
+  document.getElementById('bEDesc').value = bk.description || '';
+  const e = document.getElementById('editBookErr'); if (e) e.classList.add('hidden');
+  openModal('editBookModal');
+}
+function saveEditBook() {
+  const bk = bookById(editBookId); if (!bk) return;
+  const title = val('bETitle'), author = val('bEAuthor'), category = document.getElementById('bECategory').value, isbn = val('bEISBN'), desc = val('bEDesc');
+  const err = document.getElementById('editBookErr');
+  if (!title || !author || !category || !isbn) { showErr(err, 'Please fill in all required fields.'); return; }
+  bk.title = title; bk.author = author; bk.category = category; bk.isbn = isbn; bk.description = desc;
+  save(); closeModal('editBookModal');
+  toast('Book updated', `"${title}" has been updated.`);
+  renderBooks(); renderDashboard(); renderBorrow();
 }
 
 function renderStudents() {
@@ -284,7 +312,10 @@ function renderStudents() {
         <td style="color:var(--muted);font-size:13px">${esc(s.course)}<br><span style="font-size:12px;color:#b0a596">${esc(s.section)}</span></td>
         <td style="color:var(--muted);font-size:13px">${esc(s.year)}</td>
         <td style="text-align:center"><span class="badge ${active ? 'b-borrowed' : ''}" style="${active ? '' : 'background:#efe7da;color:var(--muted)'}">${active}</span></td>
-        <td style="text-align:right"><button class="icon-btn" onclick="deleteStudent('${s.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button></td>
+        <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
+          <button class="icon-btn" title="Reset Password" onclick="openResetPassword('${s.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></button>
+          <button class="icon-btn" title="Delete" onclick="deleteStudent('${s.id}')"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
+        </div></td>
       </tr>`;
     }).join('')}</tbody></table></div>`;
 }
@@ -306,9 +337,40 @@ function deleteStudent(id) {
   openConfirm('Delete this student?', 'This removes the student and their borrow history.', () => {
     DB.students = DB.students.filter(x => x.id !== id);
     DB.records = DB.records.filter(r => r.studentId !== id);
+    DB.waitlist = DB.waitlist.filter(w => w.studentId !== id);
     save(); toast('Student removed', 'The student record has been deleted.');
     renderStudents(); renderDashboard(); updateReqBadge();
   });
+}
+
+let resetPassStudentId = null;
+function openResetPassword(sId) {
+  const s = studentById(sId); if (!s) return;
+  resetPassStudentId = sId;
+  document.getElementById('resetPassStudentName').textContent = s.name + ' (' + s.studentId + ')';
+  document.getElementById('resetPassNew').value = '';
+  const e = document.getElementById('resetPassErr'); if (e) e.classList.add('hidden');
+  openModal('resetPassModal');
+}
+function confirmResetPassword() {
+  const s = studentById(resetPassStudentId); if (!s) return;
+  const pw = document.getElementById('resetPassNew').value;
+  const err = document.getElementById('resetPassErr');
+  if (!validPassword(pw)) { showErr(err, 'Password must be at least 6 characters.'); return; }
+  s.password = pw; save(); closeModal('resetPassModal');
+  toast('Password reset', `New password set for ${s.name}.`);
+}
+function exportStudentsCSV() {
+  const list = students();
+  if (!list.length) { toast('Nothing to export', 'There are no registered students yet.', true); return; }
+  const rows = [['Full Name', 'Student ID', 'Course', 'Section', 'Year Level', 'Active Loans']];
+  list.forEach(s => {
+    const active = records().filter(r => r.studentId === s.id && (r.status === 'borrowed' || r.status === 'overdue')).length;
+    rows.push([s.name, s.studentId, s.course, s.section, s.year, active]);
+  });
+  const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+  downloadFile('library-students-' + today() + '.csv', csv, 'text/csv');
+  toast('CSV exported', `${rows.length - 1} student(s) downloaded.`);
 }
 
 function renderRequests() {

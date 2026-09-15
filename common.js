@@ -80,6 +80,7 @@ function refreshCategorySelects(){
   makeOpts(document.getElementById('bookCatFilter'),true);
   makeOpts(document.getElementById('stuCatFilter'),true);
   makeOpts(document.getElementById('bCategory'),false);
+  makeOpts(document.getElementById('bECategory'),false);
 }
 
 function loadSession(){try{const raw=sessionStorage.getItem(SESSION_KEY);if(raw){const s=JSON.parse(raw);if(s&&(s.role==='admin'||s.role==='student'))return s}}catch(e){}return{role:null,studentId:null}}
