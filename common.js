@@ -97,7 +97,7 @@ function toast(title,desc,err){
   el.innerHTML=`<strong>${esc(title)}</strong>${desc?`<span>${esc(desc)}</span>`:''}`;
   wrap.appendChild(el);setTimeout(()=>{el.style.animation='slideOut .22s ease forwards';setTimeout(()=>el.remove(),220)},3000);
 }
-function esc(s){return String(s==null?'':s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"').replace(/'/g,'&#39;')}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
 function openModal(id){const m=document.getElementById(id);if(m)m.classList.add('open')}
 function closeModal(id){const m=document.getElementById(id);if(m)m.classList.remove('open')}
@@ -226,7 +226,7 @@ window.addEventListener('storage',e=>{
         updateReqBadge();
       }
       const stuVisible=document.getElementById('screen-student')&&!document.getElementById('screen-student').classList.contains('hidden');
-      if(stuVisible&&session.role==='student'&&studentById(session.studentId))renderStudentPortal();
+      if(stuVisible&&session.role==='student'&&studentById(session.studentId)){renderStudentPortal();if(typeof checkWaitlistReady==='function')checkWaitlistReady(session.studentId)}
     }catch(err){}
   }
   if(e.key===THEME_KEY){try{const t=e.newValue;if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');if(document.body)document.body.setAttribute('data-theme','dark')}else{document.documentElement.removeAttribute('data-theme');if(document.body)document.body.removeAttribute('data-theme')}updateThemeIcons()}catch(err){}}
