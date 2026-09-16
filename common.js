@@ -174,7 +174,7 @@ body{font-family:'Cascadia Code',ui-monospace,Menlo,Consolas,monospace;color:#23
 }
 
 function formatSid(input){let v=input.value.replace(/\D/g,'').slice(0,9);let out=v.slice(0,2);if(v.length>2)out+='-'+v.slice(2,6);if(v.length>6)out+='-'+v.slice(6,9);input.value=out}
-function validSid(sid){return/^25-\d{4}-\d{3}$/.test(sid)}
+function validSid(sid){return/^\d{2}-\d{4}-\d{3}$/.test(sid)}
 function validPassword(pw){return typeof pw==='string'&&pw.length>=6}
 
 function avatarHTML(name,photo,size=38,fontSize=14){

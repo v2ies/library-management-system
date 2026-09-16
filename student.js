@@ -12,18 +12,18 @@ function switchGate(mode){
 function studentRegister(){
   const name=document.getElementById('regName').value.trim(),sid=document.getElementById('regSid').value.trim();
   const password=document.getElementById('regPassword').value,passwordConfirm=document.getElementById('regPasswordConfirm').value;
-  const year=document.getElementById('regYear').value,section=document.getElementById('regSection').value.trim(),course=document.getElementById('regCourse').value;
+  const year=document.getElementById('regYear').value,course=document.getElementById('regCourse').value;
   const consentEl=document.getElementById('regConsent');
   const err=document.getElementById('regErr');
-  if(!name||!sid||!password||!passwordConfirm||!year||!section||!course){showErr(err,'Please fill in all required fields.');return}
-  if(!validSid(sid)){showErr(err,'Student ID must follow the format 25-XXXX-XXX (starts with 25).');return}
+  if(!name||!sid||!password||!passwordConfirm||!year||!course){showErr(err,'Please fill in all required fields.');return}
+  if(!validSid(sid)){showErr(err,'Student ID must follow the format YY-XXXX-XXX.');return}
   if(students().some(s=>s.studentId===sid)){showErr(err,'This Student ID is already registered. Please log in instead.');return}
   if(!validPassword(password)){showErr(err,'Password must be at least 6 characters.');return}
   if(password!==passwordConfirm){showErr(err,'Passwords do not match.');return}
   if(consentEl&&!consentEl.checked){showErr(err,'Please confirm you have read the Privacy Notice and Terms of Use.');return}
-  const s={id:'s'+DB.counters.s++,studentId:sid,password,name,year,section,course,photo:null};
+  const s={id:'s'+DB.counters.s++,studentId:sid,password,name,year,course,photo:null};
   DB.students.push(s);save();err.classList.add('hidden');
-  ['regName','regSid','regSection','regPassword','regPasswordConfirm'].forEach(id=>document.getElementById(id).value='');
+  ['regName','regSid','regPassword','regPasswordConfirm'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('regYear').value='';document.getElementById('regCourse').value='';
   if(consentEl)consentEl.checked=false;
   toast('Registration successful','You can now log in with your Student ID and password.');
@@ -32,7 +32,7 @@ function studentRegister(){
 
 function studentLogin(){
   const sid=document.getElementById('loginSid').value.trim(),password=document.getElementById('loginPass').value,err=document.getElementById('loginErr');
-  if(!validSid(sid)){showErr(err,'Enter a valid Student ID (25-XXXX-XXX).');return}
+  if(!validSid(sid)){showErr(err,'Enter a valid Student ID (YY-XXXX-XXX).');return}
   if(!password){showErr(err,'Please enter your password.');return}
   const s=students().find(x=>x.studentId===sid);
   if(!s){showErr(err,'No account found for that Student ID. Please register first.');return}
@@ -62,7 +62,7 @@ function renderStudentPortal(){
   const hn=document.getElementById('stuHeaderName');if(hn)hn.textContent='Welcome, '+s.name;
   document.getElementById('stuAvatar').outerHTML=avatarHTML(s.name,s.photo,52,20).replace('class="avatar"','class="avatar" id="stuAvatar"').replace('style="','style="background:var(--gold);color:#3a2c07;');
   document.getElementById('stuName').textContent=s.name;
-  document.getElementById('stuMeta').textContent=`${s.studentId} · ${s.course} · ${s.section} · ${s.year}`;
+  document.getElementById('stuMeta').textContent=`${s.studentId} · ${s.course} · ${s.year}`;
   const my=records().filter(r=>r.studentId===s.id);
   document.getElementById('stuActiveCount').textContent=my.filter(r=>r.status==='borrowed'||r.status==='overdue').length;
   document.getElementById('stuPendingCount').textContent=my.filter(r=>r.status==='pending').length;
@@ -241,4 +241,4 @@ function renderStuWaitlist(){
     </div></div>`;
 }
 
-boot();
+boot(); 

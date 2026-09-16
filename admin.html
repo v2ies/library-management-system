@@ -152,7 +152,7 @@
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
           <label class="sr-only" for="studentSearch">Search students</label>
-          <input id="studentSearch" placeholder="Search name, ID, course, section..." style="max-width:400px" oninput="renderStudents()">
+          <input id="studentSearch" placeholder="Search name, ID, course..." style="max-width:400px" oninput="renderStudents()">
           <div style="display:flex;gap:8px">
             <button class="btn btn-outline" style="font-size:12.5px;padding:10px 14px" onclick="exportStudentsCSV()">Export CSV</button>
             <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
@@ -307,11 +307,10 @@
     <p class="sub">Add a student so they can borrow books.</p>
     <div style="display:flex;flex-direction:column;gap:16px">
       <div><label class="lbl" for="sName">Full Name *</label><input id="sName"></div>
-      <div><label class="lbl" for="sId">Student ID *</label><input id="sId" maxlength="11" oninput="formatSid(this)"><p class="hint">Format: 25-XXXX-XXX</p></div>
+      <div><label class="lbl" for="sId">Student ID *</label><input id="sId" maxlength="11" inputmode="numeric" oninput="formatSid(this)"><p class="hint">Format: YY-XXXX-XXX</p></div>
       <div><label class="lbl" for="sPassword">Temporary Password *</label><input id="sPassword" type="password" placeholder="••••••"><p class="hint">At least 6 characters. The student can change it later in Settings.</p></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
         <div><label class="lbl" for="sYear">Year Level *</label><select id="sYear"><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option><option>5th Year</option></select></div>
-        <div><label class="lbl" for="sSection">Section *</label><input id="sSection"></div>
       </div>
       <div><label class="lbl" for="sCourse">Course *</label>
         <select id="sCourse">

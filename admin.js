@@ -299,17 +299,17 @@ function renderStudents() {
   const el0 = document.getElementById('studentsTable');
   if (!searchEl || !el0) return;
   const search = searchEl.value.toLowerCase();
-  const filtered = students().filter(s => !search || [s.name, s.studentId, s.course, s.section, s.year].some(f => (f || '').toLowerCase().includes(search)));
+  const filtered = students().filter(s => !search || [s.name, s.studentId, s.course, s.year].some(f => (f || '').toLowerCase().includes(search)));
   const el = document.getElementById('studentsTable');
   if (!filtered.length) { el.innerHTML = emptyBox('users', 'No students found', 'Register a student to get started.'); return; }
   el.innerHTML = `<div style="overflow-x:auto"><table>
-    <thead><tr><th>Student</th><th>Student ID</th><th>Course / Section</th><th>Year</th><th style="text-align:center">Active</th><th style="text-align:right">Actions</th></tr></thead>
+    <thead><tr><th>Student</th><th>Student ID</th><th>Course</th><th>Year</th><th style="text-align:center">Active</th><th style="text-align:right">Actions</th></tr></thead>
     <tbody>${filtered.map(s => {
       const active = records().filter(r => r.studentId === s.id && (r.status === 'borrowed' || r.status === 'overdue')).length;
       return `<tr>
         <td><div style="display:flex;align-items:center;gap:10px">${avatarHTML(s.name, s.photo)}<div><p style="margin:0;font-weight:700">${esc(s.name)}</p></div></div></td>
         <td><span style="font-family:monospace;font-size:12px;color:var(--muted)">${esc(s.studentId)}</span></td>
-        <td style="color:var(--muted);font-size:13px">${esc(s.course)}<br><span style="font-size:12px;color:#b0a596">${esc(s.section)}</span></td>
+        <td style="color:var(--muted);font-size:13px">${esc(s.course)}</td>
         <td style="color:var(--muted);font-size:13px">${esc(s.year)}</td>
         <td style="text-align:center"><span class="badge ${active ? 'b-borrowed' : ''}" style="${active ? '' : 'background:#efe7da;color:var(--muted)'}">${active}</span></td>
         <td style="text-align:right"><div style="display:flex;gap:2px;justify-content:flex-end">
@@ -322,15 +322,15 @@ function renderStudents() {
 
 function addStudentAdmin() {
   const name = val('sName'), sid = val('sId'), password = document.getElementById('sPassword').value;
-  const year = document.getElementById('sYear').value, section = val('sSection'), course = document.getElementById('sCourse').value;
-  if (!name || !sid || !password || !section) { toast('Missing fields', 'Please fill in all required fields.', true); return; }
-  if (!validSid(sid)) { toast('Invalid Student ID', 'Use the format 25-XXXX-XXX.', true); return; }
+  const year = document.getElementById('sYear').value, course = document.getElementById('sCourse').value;
+  if (!name || !sid || !password) { toast('Missing fields', 'Please fill in all required fields.', true); return; }
+  if (!validSid(sid)) { toast('Invalid Student ID', 'Use the format YY-XXXX-XXX.', true); return; }
   if (students().some(s => s.studentId === sid)) { toast('Duplicate ID', 'That Student ID is already registered.', true); return; }
   if (!validPassword(password)) { toast('Weak password', 'Password must be at least 6 characters.', true); return; }
-  DB.students.push({ id: 's' + DB.counters.s++, studentId: sid, password, name, year, section, course, photo: null });
+  DB.students.push({ id: 's' + DB.counters.s++, studentId: sid, password, name, year, course, photo: null });
   save(); toast('Student registered', `${name} has been added.`);
   closeModal('addStudentModal');
-  ['sName', 'sId', 'sSection', 'sPassword'].forEach(id => document.getElementById(id).value = '');
+  ['sName', 'sId', 'sPassword'].forEach(id => document.getElementById(id).value = '');
   renderStudents(); renderDashboard(); renderBorrow();
 }
 function deleteStudent(id) {
@@ -363,10 +363,10 @@ function confirmResetPassword() {
 function exportStudentsCSV() {
   const list = students();
   if (!list.length) { toast('Nothing to export', 'There are no registered students yet.', true); return; }
-  const rows = [['Full Name', 'Student ID', 'Course', 'Section', 'Year Level', 'Active Loans']];
+  const rows = [['Full Name', 'Student ID', 'Course', 'Year Level', 'Active Loans']];
   list.forEach(s => {
     const active = records().filter(r => r.studentId === s.id && (r.status === 'borrowed' || r.status === 'overdue')).length;
-    rows.push([s.name, s.studentId, s.course, s.section, s.year, active]);
+    rows.push([s.name, s.studentId, s.course, s.year, active]);
   });
   const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
   downloadFile('library-students-' + today() + '.csv', csv, 'text/csv');

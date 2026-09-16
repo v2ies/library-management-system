@@ -14,7 +14,7 @@ A simple, offline-first library management system for the **University of Perpet
 ## Features
 
 **Student portal (`index.html`)**
-- Register with Full Name, Student ID, password, Year, Section, and Course
+- Register with Full Name, Student ID, password, Year, and Course
 - Log in with Student ID + password
 - Browse and search books by title/author, filter by category
 - Request to borrow (goes to admin as a *pending* request)
@@ -50,7 +50,7 @@ A simple, offline-first library management system for the **University of Perpet
 ## Default Credentials & Formats
 
 - **Admin login:** username `admin` · password `library123`
-- **Student ID format:** `25-XXXX-XXX` (must start with `25`, e.g. `25-1234-567`)
+- **Student ID format:** `YY-XXXX-XXX` — dashes are inserted automatically as you type, e.g. `23-1234-567`
 - **Password rule:** at least 6 characters
 - **Loan period:** 14 days from issue date
 
