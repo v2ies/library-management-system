@@ -1,4 +1,19 @@
 // student portal logic
+const NOTIF_KEY='uphsd_notif_pref';
+function toggleNotifPanel(e){
+  if(e)e.stopPropagation();
+  const p=document.getElementById('notifPanel');
+  if(p)p.classList.toggle('hidden');
+}
+function setNotifPref(wantsNotif){
+  try{localStorage.setItem(NOTIF_KEY,wantsNotif?'yes':'no')}catch(e){}
+  const p=document.getElementById('notifPanel');if(p)p.classList.add('hidden');
+  toast(wantsNotif?'Notifications enabled':'Maybe later',wantsNotif?"We'll let you know about due dates and library updates.":'You can turn this on anytime from the bell icon.');
+}
+document.addEventListener('click',e=>{
+  const p=document.getElementById('notifPanel');
+  if(p&&!p.classList.contains('hidden')&&!p.contains(e.target)&&!e.target.closest('[data-notif-bell]'))p.classList.add('hidden');
+});
 function switchGate(mode){
   const login=document.getElementById('gateLogin'),reg=document.getElementById('gateRegister');
   const tl=document.getElementById('gateTabLogin'),tr=document.getElementById('gateTabReg');
@@ -10,28 +25,28 @@ function switchGate(mode){
 }
 
 function studentRegister(){
-  const name=document.getElementById('regName').value.trim(),sid=document.getElementById('regSid').value.trim();
-  const password=document.getElementById('regPassword').value,passwordConfirm=document.getElementById('regPasswordConfirm').value;
-  const year=document.getElementById('regYear').value,course=document.getElementById('regCourse').value;
+  const email=val('regEmail'),name=val('regName'),sid=val('regSid');
+  const password=val('regPassword'),passwordConfirm=val('regPasswordConfirm');
+  const year=val('regYear'),course=val('regCourse');
   const consentEl=document.getElementById('regConsent');
   const err=document.getElementById('regErr');
-  if(!name||!sid||!password||!passwordConfirm||!year||!course){showErr(err,'Please fill in all required fields.');return}
+  if(!email||!name||!sid||!password||!passwordConfirm||!year||!course){showErr(err,'Please fill in all required fields.');return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showErr(err,'Please enter a valid email address.');return}
   if(!validSid(sid)){showErr(err,'Student ID must follow the format YY-XXXX-XXX.');return}
   if(students().some(s=>s.studentId===sid)){showErr(err,'This Student ID is already registered. Please log in instead.');return}
   if(!validPassword(password)){showErr(err,'Password must be at least 6 characters.');return}
   if(password!==passwordConfirm){showErr(err,'Passwords do not match.');return}
   if(consentEl&&!consentEl.checked){showErr(err,'Please confirm you have read the Privacy Notice and Terms of Use.');return}
-  const s={id:'s'+DB.counters.s++,studentId:sid,password,name,year,course,photo:null};
-  DB.students.push(s);save();err.classList.add('hidden');
-  ['regName','regSid','regPassword','regPasswordConfirm'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('regYear').value='';document.getElementById('regCourse').value='';
+  const s={id:'s'+DB.counters.s++,studentId:sid,password,name,email,year,course,photo:null};
+  DB.students.push(s);save();if(err)err.classList.add('hidden');
+  ['regEmail','regName','regSid','regPassword','regPasswordConfirm','regYear','regCourse'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   if(consentEl)consentEl.checked=false;
   toast('Registration successful','You can now log in with your Student ID and password.');
   enterStudent(s.id);
 }
 
 function studentLogin(){
-  const sid=document.getElementById('loginSid').value.trim(),password=document.getElementById('loginPass').value,err=document.getElementById('loginErr');
+  const sid=val('loginSid'),password=val('loginPass'),err=document.getElementById('loginErr');
   if(!validSid(sid)){showErr(err,'Enter a valid Student ID (YY-XXXX-XXX).');return}
   if(!password){showErr(err,'Please enter your password.');return}
   const s=students().find(x=>x.studentId===sid);
@@ -241,4 +256,4 @@ function renderStuWaitlist(){
     </div></div>`;
 }
 
-boot(); 
+boot();
