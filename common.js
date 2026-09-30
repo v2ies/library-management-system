@@ -8,7 +8,7 @@ const CAT_STYLES={Fiction:{badge:'b-fic',color:'#8a4b06'},Science:{badge:'b-sci'
 function getTheme(){return document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light'}
 function updateThemeIcons(){
   const dark=getTheme()==='dark';
-  document.querySelectorAll('.theme-toggle').forEach(b=>{
+  document.querySelectorAll('.theme-toggle:not([data-notif-bell])').forEach(b=>{
     b.innerHTML=dark?ICON_SUN:ICON_MOON;
     b.title=dark?'Switch to light mode':'Switch to dark mode';
     b.setAttribute('aria-label',b.title);
