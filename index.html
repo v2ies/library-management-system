@@ -15,7 +15,7 @@ if(dark){document.documentElement.setAttribute('data-theme','dark');}
 </script>
 </head>
 <body>
-<div class="filewarn hidden" id="fileWarn">You opened this file directly — Student and Admin pages can't share data this way. Open this folder with a local server instead (VS Code Live Server, or run <b>python -m http.server</b> here).</div>
+<div class="filewarn hidden" id="fileWarn">You opened this file directly — the library now runs on a database server. Start it with <b>npm start</b> in this folder, then open <b>http://localhost:3000</b>.</div>
 <button class="theme-toggle theme-float" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 </button>
@@ -219,7 +219,7 @@ Log Out
 <div class="card" style="margin-bottom:16px">
 <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px">
 <label class="sr-only" for="stuBookSearch">Search books</label>
-<input id="stuBookSearch" placeholder="Search title, author..." style="max-width:320px" oninput="renderStuBrowse()">
+<input id="stuBookSearch" placeholder="Search title, author..." style="max-width:320px" oninput="stuSearchDebounced()">
 <label class="sr-only" for="stuCatFilter">Filter by category</label>
 <select id="stuCatFilter" style="width:170px" onchange="renderStuBrowse()">
 <option value="">All Categories</option>

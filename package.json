@@ -1,0 +1,23 @@
+{
+  "name": "uphsd-library-management-system",
+  "version": "4.0.0",
+  "description": "UPHSD Molino Library Management System — Express + SQLite",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "seed:bulk": "node server/seed-bulk.js",
+    "seed:clear": "node server/seed-bulk.js --clear",
+    "test": "node test/api.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
+  }
+}

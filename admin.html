@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<div class="filewarn hidden" id="fileWarn">You opened this file directly — Student and Admin pages can't share data this way. Open this folder with a local server instead (VS Code Live Server, or run <b>python -m http.server</b> here).</div>
+<div class="filewarn hidden" id="fileWarn">You opened this file directly — the library now runs on a database server. Start it with <b>npm start</b> in this folder, then open <b>http://localhost:3000</b>.</div>
 
 <button class="theme-toggle theme-float" type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -134,7 +134,7 @@
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
           <div style="display:flex;gap:10px;flex:1;flex-wrap:wrap">
             <label class="sr-only" for="bookSearch">Search books</label>
-            <input id="bookSearch" placeholder="Search title, author, ISBN..." style="max-width:320px" oninput="renderBooks()">
+            <input id="bookSearch" placeholder="Search title, author, ISBN..." style="max-width:320px" oninput="searchBooksDebounced()">
             <label class="sr-only" for="bookCatFilter">Filter by category</label>
             <select id="bookCatFilter" style="width:170px" onchange="renderBooks()">
               <option value="">All Categories</option>
@@ -152,7 +152,7 @@
       <div class="card" style="margin-bottom:16px">
         <div style="padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
           <label class="sr-only" for="studentSearch">Search students</label>
-          <input id="studentSearch" placeholder="Search name, ID, course..." style="max-width:400px" oninput="renderStudents()">
+          <input id="studentSearch" placeholder="Search name, ID, course..." style="max-width:400px" oninput="searchStudentsDebounced()">
           <div style="display:flex;gap:8px">
             <button class="btn btn-outline" style="font-size:12.5px;padding:10px 14px" onclick="exportStudentsCSV()">Export CSV</button>
             <button class="btn btn-primary" onclick="openModal('addStudentModal')">+ Register Student</button>
@@ -181,8 +181,8 @@
             <strong>Issue a Book</strong>
           </div>
           <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
-            <div><label class="lbl" for="borrowStudent">Student *</label><select id="borrowStudent"><option value="">Select a student</option></select></div>
-            <div><label class="lbl" for="borrowBook">Book *</label><select id="borrowBook"><option value="">Select an available book</option></select></div>
+            <div><label class="lbl" for="borrowStudent">Student *</label><input id="borrowStudentQ" placeholder="Search name or ID..." style="margin-bottom:8px" oninput="borrowPickersDebounced()"><select id="borrowStudent"><option value="">Select a student</option></select></div>
+            <div><label class="lbl" for="borrowBook">Book *</label><input id="borrowBookQ" placeholder="Search title, author, ISBN..." style="margin-bottom:8px" oninput="borrowPickersDebounced()"><select id="borrowBook"><option value="">Select an available book</option></select></div>
             <div><label class="lbl" for="borrowDue">Due Date</label><input id="borrowDue" type="date"><p class="hint">Defaults to 14 days from today.</p></div>
             <button class="btn btn-primary" style="width:100%" onclick="issueBorrow()">Issue Book</button>
           </div>

@@ -28,7 +28,7 @@ function toggleTheme(){
 <a class="back-link" href="index.html">&larr; Back to the app</a>
 <p class="legal-eyebrow">UPHSD Molino Library Management System</p>
 <h1>Privacy Notice</h1>
-<p class="legal-updated">Last updated: [fill in the date you publish this]</p>
+<p class="legal-updated">Last updated: [10/5/2026]</p>
 
 <div class="legal-notice">
 <strong>This is a class project</strong>, built by a student group (contact:
@@ -51,26 +51,23 @@ university system, and UPHSD does not operate, endorse, or take responsibility f
 
 <div class="card">
 <h2>2. Where it's stored — the important part</h2>
-<p>This app has no server and no database. Everything above is saved only in your own web
-browser, using the browser's built-in <code>localStorage</code> and <code>sessionStorage</code>
-(not cookies). Nothing you enter is transmitted over the internet or shared with any third
-party — because there's no "us" on the other end receiving it.</p>
-<p>This means: data doesn't sync between devices or browsers; clearing your browser's site data
-deletes it permanently; and anyone with access to that browser/device can view what's stored
-there, same as with any other browser-only demo app.</p>
+<p>Everything above is saved in a SQL database (SQLite) on the computer or server that runs this
+project. Your browser only keeps a temporary login token (<code>sessionStorage</code>) and your
+light/dark theme choice (<code>localStorage</code>). Nothing is sent to any third party.</p>
+<p>This means: whoever runs the server (the class group / instructor) can read the database
+file, and data stays until an admin deletes it or the database file is removed.</p>
 </div>
 
 <div class="card">
 <h2>3. A note on the password field</h2>
-<p>Because there's no server, there's no way to secure the password field the way a production
-system would. Treat this as a demo account, not a real one — use a throwaway password you don't
-use anywhere else.</p>
+<p>Passwords are stored as salted scrypt hashes, not as plain text. Even so, this is a class
+demo, not a production system — use a throwaway password you don't use anywhere else.</p>
 </div>
 
 <div class="card">
 <h2>4. Cookies</h2>
-<p>This site doesn't use cookies. It uses <code>localStorage</code> (persistent until cleared)
-and <code>sessionStorage</code> (cleared when the tab/browser closes) purely to run the app
+<p>This site doesn't use cookies. It uses <code>localStorage</code> (theme preference only)
+and <code>sessionStorage</code> (login token, cleared when the tab/browser closes) purely to run the app
 itself — no tracking or advertising use, so no cookie-consent banner applies here.</p>
 </div>
 
@@ -84,9 +81,9 @@ this notice should be updated to say what's added and why.</p>
 <div class="card">
 <h2>6. Your choices</h2>
 <ul>
-<li>Delete your own data any time by clearing your browser's site data for this page.</li>
+<li>Ask an admin to delete your student record and borrow history from the database.</li>
 <li>Ask an admin (the class group) to remove a student record from the demo.</li>
-<li>Don't enter information you wouldn't want visible to anyone using the same device/browser.</li>
+<li>Don't enter information you wouldn't want visible to the people who run this demo.</li>
 </ul>
 </div>
 

@@ -1,4 +1,4 @@
-const THEME_KEY='uphsd_theme',STORE_KEY='uphsd_library_v3',SESSION_KEY='uphsd_session',FLASH_KEY='uphsd_flash';
+const THEME_KEY='uphsd_theme',SESSION_KEY='uphsd_session',FLASH_KEY='uphsd_flash';
 const ICON_MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 const ICON_SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
 const DEFAULT_CATEGORIES=['Fiction','Science','History','Reference'];
@@ -28,49 +28,58 @@ function initTheme(){
   updateThemeIcons();
 }
 
-function seed(){return{books:[
-  {id:'b1',title:'Noli Me Tangere',author:'Jose Rizal',category:'Fiction',isbn:'978-9710579891',description:'The classic Filipino novel of colonial society.',totalCopies:4,availableCopies:2},
-  {id:'b2',title:'El Filibusterismo',author:'Jose Rizal',category:'Fiction',isbn:'978-9710579907',description:'The sequel to Noli Me Tangere.',totalCopies:3,availableCopies:3},
-  {id:'b3',title:'A Brief History of Time',author:'Stephen Hawking',category:'Science',isbn:'978-0553380163',description:'From the Big Bang to black holes.',totalCopies:3,availableCopies:1},
-  {id:'b4',title:'Sapiens: A Brief History of Humankind',author:'Yuval Noah Harari',category:'History',isbn:'978-0062316097',description:'A groundbreaking narrative of humanity.',totalCopies:2,availableCopies:0},
-  {id:'b5',title:'The Filipino Primitive',author:'Nick Joaquin',category:'History',isbn:'978-9715505543',description:'Essays on Philippine culture and history.',totalCopies:2,availableCopies:2},
-  {id:'b6',title:'Cosmos',author:'Carl Sagan',category:'Science',isbn:'978-0345539434',description:'A personal voyage through the universe.',totalCopies:3,availableCopies:2},
-  {id:'b7',title:'Oxford English Dictionary',author:'Oxford University Press',category:'Reference',isbn:'978-0199571123',description:'Comprehensive reference dictionary.',totalCopies:5,availableCopies:5},
-  {id:'b8',title:'Florante at Laura',author:'Francisco Balagtas',category:'Fiction',isbn:'978-9712300011',description:'A classic Filipino awit.',totalCopies:3,availableCopies:3}
-],students:[],records:[],waitlist:[],counters:{b:9,s:1,r:1,w:1},customCategories:[]}}
 
-let DB=load();
-function load(){
-  try{
-    const raw=localStorage.getItem(STORE_KEY);
-    if(raw){
-      const db=JSON.parse(raw);
-      if(db&&typeof db==='object'){
-        if(!Array.isArray(db.waitlist))db.waitlist=[];
-        if(!db.counters)db.counters={b:9,s:1,r:1,w:1};
-        if(db.counters.w==null)db.counters.w=1;
-        return db;
-      }
-    }
-  }catch(e){}
-  const fresh=seed();persist(fresh);return fresh;
+// ------------------------------------------------------------------ API layer
+// All data now lives in the SQL database on the server; the browser only keeps the login token.
+class ApiError extends Error{constructor(m,status){super(m);this.status=status}}
+async function api(method,url,body){
+  const headers={};
+  if(body!==undefined)headers['Content-Type']='application/json';
+  if(session&&session.token)headers.Authorization='Bearer '+session.token;
+  let res;
+  try{res=await fetch(url,{method,headers,body:body===undefined?undefined:JSON.stringify(body)})}
+  catch(e){throw new ApiError('Cannot reach the library server. Make sure it is running (npm start).',0)}
+  const text=await res.text();let data=null;try{data=text?JSON.parse(text):null}catch(e){}
+  if(!res.ok){
+    if(res.status===401&&session&&session.token){saveSession({role:null,studentId:null});flashToast('Session expired','Please log in again.');window.location.reload()}
+    throw new ApiError((data&&data.error)||res.statusText||'Request failed',res.status);
+  }
+  return data;
 }
-function persist(db){localStorage.setItem(STORE_KEY,JSON.stringify(db||DB))}
-function save(){persist(DB)}
+function guard(fn){return async function(...a){try{return await fn.apply(this,a)}catch(e){toast('Something went wrong',(e&&e.message)||String(e),true)}}}
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+function seqGuard(){let n=0;return()=>{const id=++n;return()=>id===n}}   // ignore out-of-order responses while typing
+async function downloadAuthed(url,filename){
+  const res=await fetch(url,{headers:{Authorization:'Bearer '+session.token}});
+  if(!res.ok)throw new ApiError('Download failed.',res.status);
+  downloadFile(filename,await res.blob(),res.headers.get('Content-Type')||'application/octet-stream');
+}
+function pagerHTML(d,fn){
+  if(!d||!d.total)return'';
+  const info=`<span>${d.total.toLocaleString()} total</span>`;
+  if(d.pages<=1)return`<div class="pager">${info}</div>`;
+  return`<div class="pager">${info}<div class="pager-btns">
+    <button class="btn btn-outline" ${d.page<=1?'disabled':''} onclick="${fn}(${d.page-1})">&lsaquo; Prev</button>
+    <span>Page ${d.page.toLocaleString()} of ${d.pages.toLocaleString()}</span>
+    <button class="btn btn-outline" ${d.page>=d.pages?'disabled':''} onclick="${fn}(${d.page+1})">Next &rsaquo;</button></div></div>`;
+}
 
-const books=()=>DB.books,students=()=>DB.students,records=()=>DB.records,waitlist=()=>DB.waitlist;
-const bookById=id=>DB.books.find(b=>b.id===id),studentById=id=>DB.students.find(s=>s.id===id);
+const RECCACHE=new Map();
+function cacheRecords(list){list.forEach(r=>RECCACHE.set(String(r.id),r))}
 
 function downloadFile(filename,content,mime){
-  const blob=new Blob([content],{type:mime});
+  const blob=content instanceof Blob?content:new Blob([content],{type:mime});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.download=filename;document.body.appendChild(a);a.click();
   setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url)},0);
 }
 
-function getCategories(){return[...new Set([...DEFAULT_CATEGORIES,...(DB.customCategories||[]),...books().map(b=>b.category)])]}
-function refreshCategorySelects(){
+let CATS=[];
+async function loadCategories(){if(session&&session.token)CATS=await api('GET','/api/categories')}
+function getCategories(){return CATS.map(c=>c.name)}
+async function refreshCategorySelects(){
+  await loadCategories();
   const cats=getCategories();
   const makeOpts=(sel,all)=>{
     if(!sel)return;const cur=sel.value;
@@ -83,13 +92,14 @@ function refreshCategorySelects(){
   makeOpts(document.getElementById('bECategory'),false);
 }
 
-function loadSession(){try{const raw=sessionStorage.getItem(SESSION_KEY);if(raw){const s=JSON.parse(raw);if(s&&(s.role==='admin'||s.role==='student'))return s}}catch(e){}return{role:null,studentId:null}}
+function loadSession(){try{const raw=sessionStorage.getItem(SESSION_KEY);if(raw){const s=JSON.parse(raw);if(s&&(s.role==='admin'||s.role==='student')&&s.token)return s}}catch(e){}return{role:null,studentId:null}}
 function saveSession(s){session=s||{role:null,studentId:null};try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(session))}catch(e){}}
 let session=loadSession();
 function flashToast(title,desc){try{sessionStorage.setItem(FLASH_KEY,JSON.stringify({title,desc}))}catch(e){}}
 function showFlashToast(){try{const raw=sessionStorage.getItem(FLASH_KEY);if(!raw)return;sessionStorage.removeItem(FLASH_KEY);const f=JSON.parse(raw);if(f&&f.title)toast(f.title,f.desc||'')}catch(e){}}
 
-function refreshOverdue(){const today=new Date().toISOString().slice(0,10);DB.records.forEach(r=>{if(r.status==='borrowed'&&r.dueDate&&r.dueDate<today)r.status='overdue'});save()}
+let _autoTimer=null;
+function startAutoRefresh(fn,ms){clearInterval(_autoTimer);_autoTimer=setInterval(()=>{if(document.hidden||!session.token)return;Promise.resolve(fn()).catch(()=>{})},ms||15000)}
 
 function toast(title,desc,err){
   const wrap=document.getElementById('toastWrap');if(!wrap)return;
@@ -133,13 +143,12 @@ function daysLate(r){
   const diff=Math.floor((end-due)/864e5);
   return diff>0?diff:0;
 }
-function fineFor(r){return daysLate(r)*FINE_PER_DAY}
+function fineFor(r){return r.fine!=null?r.fine:daysLate(r)*FINE_PER_DAY}
+
 
 function printSlipForRecord(id){
-  const r=records().find(x=>x.id===id);if(!r)return;
-  const bk=bookById(r.bookId),st=studentById(r.studentId);
-  if(!bk||!st)return;
-  printSlip(st.name,bk.title,r.dueDate||'—');
+  const r=RECCACHE.get(String(id));if(!r)return;
+  printSlip(r.studentName,r.bookTitle,r.dueDate||'—');
 }
 function printSlip(name,book,due){
   const w=window.open('','_blank','width=420,height=620');
@@ -211,32 +220,23 @@ function emptyBox(icon,title,sub){
 function val(id){const el=document.getElementById(id);return el?el.value.trim():''}
 function showErr(el,msg){if(!el)return;el.textContent=msg;el.classList.remove('hidden')}
 
-window.addEventListener('storage',e=>{
-  if(!e)return;
-  if(e.key===STORE_KEY){
-    try{DB=load()}catch(err){return}
-    refreshOverdue();refreshCategorySelects();
-    try{
-      const adminVisible=document.getElementById('screen-admin')&&!document.getElementById('screen-admin').classList.contains('hidden');
-      if(adminVisible){
-        const active=document.querySelector('#screen-admin .tab-content.active');
-        const id=active?active.id:'tab-dashboard';
-        if(id==='tab-dashboard')renderDashboard();else if(id==='tab-books')renderBooks();else if(id==='tab-students')renderStudents();
-        else if(id==='tab-requests')renderRequests();else if(id==='tab-borrow')renderBorrow();else if(id==='tab-history')renderHistory();
-        updateReqBadge();
-      }
-      const stuVisible=document.getElementById('screen-student')&&!document.getElementById('screen-student').classList.contains('hidden');
-      if(stuVisible&&session.role==='student'&&studentById(session.studentId)){renderStudentPortal();if(typeof checkWaitlistReady==='function')checkWaitlistReady(session.studentId)}
-    }catch(err){}
-  }
-  if(e.key===THEME_KEY){try{const t=e.newValue;if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');if(document.body)document.body.setAttribute('data-theme','dark')}else{document.documentElement.removeAttribute('data-theme');if(document.body)document.body.removeAttribute('data-theme')}updateThemeIcons()}catch(err){}}
-});
-
-function boot(){
-  refreshOverdue();initTheme();refreshCategorySelects();showFlashToast();
+async function boot(){
+  initTheme();showFlashToast();
   try{if(window.location&&window.location.protocol==='file:'){const w=document.getElementById('fileWarn');if(w)w.classList.remove('hidden')}}catch(e){}
   session=loadSession();
   const isAdminPage=!!document.getElementById('screen-admin'),isIndexPage=!!document.getElementById('screen-landing');
-  if(isAdminPage){if(session.role==='admin'){showScreen('screen-admin');switchTab('dashboard',document.querySelector('#screen-admin .tab-btn'))}else showScreen('screen-admin-landing');return}
-  if(isIndexPage){if(session.role==='student'&&studentById(session.studentId)){showScreen('screen-student');switchStuTab('browse',document.querySelector('#screen-student .tab-btn'));renderStudentPortal();if(typeof checkDueSoon==='function')checkDueSoon(session.studentId);if(typeof checkWaitlistReady==='function')checkWaitlistReady(session.studentId)}else{saveSession({role:null,studentId:null});showScreen('screen-landing')}}
+  try{
+    if(isAdminPage){
+      if(session.role==='admin'){await api('GET','/api/admin/ping');await refreshCategorySelects();showScreen('screen-admin');switchTab('dashboard',document.querySelector('#screen-admin .tab-btn'));startAutoRefresh(adminAutoRefresh)}
+      else showScreen('screen-admin-landing');
+      return;
+    }
+    if(isIndexPage){
+      if(session.role==='student'){await refreshCategorySelects();await enterStudent(session.studentId,true);startAutoRefresh(studentAutoRefresh);checkDueSoon();checkWaitlistReady()}
+      else{saveSession({role:null,studentId:null});showScreen('screen-landing')}
+    }
+  }catch(e){
+    if(e.status===0)toast('Server not reachable',e.message,true);
+    if(isAdminPage)showScreen('screen-admin-landing');else if(isIndexPage)showScreen('screen-landing');
+  }
 }
