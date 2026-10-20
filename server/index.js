@@ -545,7 +545,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true, books: db.prepare('SEL
 app.use('/api', (req, res) => { throw notFound('Unknown API route.'); });
 
 const ROOT = path.join(__dirname, '..');
-const PAGES = new Set(['index.html', 'admin.html', 'privacy.html', 'terms.html', 'styles.css', 'common.js', 'student.js', 'admin.js']);
+const PAGES = new Set(['index.html', 'admin.html', 'privacy.html', 'terms.html', 'styles.css', 'common.js', 'student.js', 'chatbot.js', 'admin.js']);
 app.get('/', (req, res) => res.sendFile(path.join(ROOT, 'index.html')));
 app.get('/:file', (req, res, next) => PAGES.has(req.params.file) ? res.sendFile(path.join(ROOT, req.params.file)) : next());
 app.use('/public', express.static(path.join(ROOT, 'public')));
